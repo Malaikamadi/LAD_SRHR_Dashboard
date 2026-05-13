@@ -102,9 +102,9 @@ export default function MilestoneTracking() {
             </div>
           </div>
 
-          {/* Overall API Progress Chart */}
+          {/* Overall KPI Progress Chart */}
           <div className="chart-card" style={{marginBottom:'var(--space-5)'}}>
-            <div className="chart-card__header"><h3>API Completion by Entity</h3><p className="chart-card__subtitle">Overall activity progress indicator across all implementing entities</p></div>
+            <div className="chart-card__header"><h3>KPI Completion by Entity</h3><p className="chart-card__subtitle">Overall activity progress indicator across all implementing entities</p></div>
             <div className="chart-card__body">
               <ResponsiveContainer width="100%" height={340}>
                 <BarChart data={entityApiProgress} layout="vertical">
@@ -112,7 +112,7 @@ export default function MilestoneTracking() {
                   <XAxis type="number" domain={[0,100]} tick={{fill:'#64748B',fontSize:11}} axisLine={{stroke:'#E2E8F0'}} tickLine={false} unit="%" />
                   <YAxis type="category" dataKey="name" tick={{fill:'#334155',fontSize:12,fontWeight:600}} axisLine={{stroke:'#E2E8F0'}} tickLine={false} width={100} />
                   <Tooltip formatter={v=>`${v}%`} contentStyle={{background:'white',border:'1px solid #E2E8F0',borderRadius:10,fontSize:12}} />
-                  <Bar dataKey="progress" name="API Progress" radius={[0,6,6,0]} barSize={18}>
+                  <Bar dataKey="progress" name="KPI Progress" radius={[0,6,6,0]} barSize={18}>
                     {entityApiProgress.map((e,i) => <Cell key={i} fill={e.color} />)}
                   </Bar>
                 </BarChart>
@@ -205,10 +205,10 @@ export default function MilestoneTracking() {
 
           {/* Activities Table */}
           <div className="ms-card">
-            <div className="ms-card__header"><Award size={18} color="var(--color-teal)" /><h3>Activities & API</h3><span className="ms-card__count">{deepDive.activities.length} activities</span></div>
+            <div className="ms-card__header"><Award size={18} color="var(--color-teal)" /><h3>Activities & KPI</h3><span className="ms-card__count">{deepDive.activities.length} activities</span></div>
             <div className="ms-table-wrapper">
               <table className="ms-table">
-                <thead><tr><th>#</th><th>Activity</th><th>Actual for the Period</th><th>API (Annual Performance Indicator)</th><th>Status</th></tr></thead>
+                <thead><tr><th>#</th><th>Activity</th><th>Actual for the Period</th><th>KPI (Key Performance Indicator)</th><th>Status</th></tr></thead>
                 <tbody>
                   {deepDive.activities.map((act, i) => (
                     <tr key={i}>

@@ -4,11 +4,11 @@ import './Sidebar.css';
 
 const navItems = [
   { id: 'overview', icon: LayoutDashboard, label: 'Executive Overview' },
+  { id: 'milestones', icon: Flag, label: 'Milestone Tracking' },
   { id: 'map', icon: Map, label: 'Implementing Entities Location' },
   { id: 'analytics', icon: BarChart3, label: 'Implementing Entities Analytics' },
   { id: 'burn-rate', icon: Flame, label: 'Burn Rate' },
   { id: 'procurement', icon: ShoppingCart, label: 'Procurement Tracker' },
-  { id: 'milestones', icon: Flag, label: 'Milestone Tracking' },
 ];
 
 export default function Sidebar({ activeSection, onSectionChange, collapsed, onToggleCollapse }) {
