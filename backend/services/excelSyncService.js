@@ -10,8 +10,19 @@ const excelService = require('./excelService');
 class ExcelSyncService {
   constructor() {
     this.sourceUrl = process.env.EXCEL_SOURCE_URL || null;
-    this.localFallbackPath = path.join(__dirname, '../uploads/master_data.xlsx');
+    this.uploadsDir = path.join(__dirname, '../uploads');
+    this.localFallbackPath = path.join(this.uploadsDir, 'master_data.xlsx');
     this.syncInterval = process.env.SYNC_INTERVAL || '*/5 * * * *';
+
+    // Render's container starts with a fresh ephemeral filesystem and we gitignore
+    // backend/uploads/, so make sure the dir exists before we try to write to it.
+    try {
+      if (!fs.existsSync(this.uploadsDir)) {
+        fs.mkdirSync(this.uploadsDir, { recursive: true });
+      }
+    } catch (err) {
+      console.warn('[ExcelSync] Could not create uploads directory:', err.message);
+    }
   }
 
   initializeSync() {
