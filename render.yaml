@@ -1,0 +1,33 @@
+# Render Blueprint — deploys the LAD SRHR backend as a long-running Node web service.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# To deploy:
+#   1. Sign up at https://render.com (free tier is fine for this service)
+#   2. New > Blueprint > connect this GitHub repo > pick this render.yaml
+#   3. Render auto-creates the service, builds it, and exposes a public HTTPS URL
+#      like https://lad-srhr-backend.onrender.com
+#   4. Copy that URL into Vercel as VITE_API_BASE and redeploy the frontend
+#
+# Free-tier notes:
+#   - Instance spins down after 15 min idle; next request triggers ~30-60s cold
+#     start. The cron sync will re-run on each cold start.
+#   - 512 MB RAM is plenty (parser uses ~50 MB).
+#   - Public HTTPS terminates at Render's edge, so Vercel's HTTPS frontend can
+#     call this backend without mixed-content issues.
+
+services:
+  - type: web
+    name: lad-srhr-backend
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/meta
+    envVars:
+      - key: EXCEL_SOURCE_URL
+        value: https://docs.google.com/spreadsheets/d/13BdhsV2kybmVf2Hg1FRJB3wsARjfES6ctTiHbX_pYFk/export?format=xlsx
+      - key: SYNC_INTERVAL
+        value: "*/5 * * * *"
+      # PORT is set automatically by Render; the backend reads it from env.

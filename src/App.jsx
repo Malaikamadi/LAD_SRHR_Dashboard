@@ -55,14 +55,35 @@ function DashboardContent() {
   const [activeSection, setActiveSection] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [overviewEntity, setOverviewEntity] = useState(null);
-  const { loading, error } = useData();
+  const { loading, error, refresh } = useData();
+  const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5001';
 
   if (loading) {
-    return <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center', background: '#0F172A', color: 'white' }}><h2>Loading National Health Data from Master Excel...</h2></div>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18, height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center', background: '#0F172A', color: 'white', fontFamily: 'Inter, system-ui, sans-serif', padding: 24, textAlign: 'center' }}>
+        <div style={{ width: 56, height: 56, border: '4px solid rgba(20,184,166,0.25)', borderTopColor: '#14B8A6', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Loading National Health Data…</h2>
+        <p style={{ color: '#94A3B8', margin: 0, fontSize: '.9rem' }}>Fetching the master Excel from <code style={{ color: '#14B8A6' }}>{apiBase}</code></p>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      </div>
+    );
   }
 
   if (error) {
-    return <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center', background: '#0F172A', color: '#F87171' }}><h2>Error loading data: {error}</h2></div>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minHeight: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center', background: '#0F172A', color: '#E2E8F0', fontFamily: 'Inter, system-ui, sans-serif', padding: 24, textAlign: 'center' }}>
+        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#EF4444', fontSize: 32 }}>⚠</div>
+        <h2 style={{ fontSize: '1.6rem', margin: 0, color: '#F87171' }}>Unable to reach the data backend</h2>
+        <p style={{ color: '#94A3B8', maxWidth: 640, margin: 0, lineHeight: 1.55 }}>
+          The dashboard tried to fetch live data from <code style={{ color: '#14B8A6', background: '#1E293B', padding: '2px 8px', borderRadius: 4 }}>{apiBase}</code> but the request failed:
+        </p>
+        <pre style={{ color: '#FBBF24', background: '#1E293B', padding: '12px 18px', borderRadius: 8, fontSize: '.85rem', maxWidth: 640, overflow: 'auto', margin: 0 }}>{error}</pre>
+        <div style={{ color: '#94A3B8', maxWidth: 640, fontSize: '.85rem', lineHeight: 1.55, marginTop: 8 }}>
+          If you are viewing this on a deployed site (e.g. Vercel), the backend must be publicly reachable — <code style={{ color: '#06B6D4' }}>localhost</code> only works when you are running the backend on the same machine as your browser. Deploy the backend to a public host (Render / Railway / Fly.io) and set the <code style={{ color: '#06B6D4' }}>VITE_API_BASE</code> environment variable in Vercel.
+        </div>
+        <button onClick={refresh} style={{ marginTop: 12, padding: '10px 22px', background: '#14B8A6', color: 'white', border: 0, borderRadius: 8, fontSize: '.9rem', fontWeight: 600, cursor: 'pointer' }}>Retry</button>
+      </div>
+    );
   }
 
   return (
