@@ -18,18 +18,35 @@ function WaterfallTooltip({ active, payload, label }) {
   );
 }
 
+import { useData } from '../context/DataContext';
+
 export default function BurnRate() {
-  const { totalFunds, totalDispensed, totalUnspent, burnRates } = burnRateData;
+  const { finance } = useData();
+
+  // Use backend finance data or fallback to static data
+  const totalFunds = finance?.summary?.TotalFundsProvided || burnRateData.totalFunds;
+  const totalDispensed = finance?.summary?.Dispensed || burnRateData.totalDispensed;
+  const totalUnspent = finance?.summary?.Unspent || burnRateData.totalUnspent;
+  
+  // Use static burn rates for now since they are complex or mock them
+  const burnRates = burnRateData.burnRates;
+  
+  const mappedFundFlowData = finance?.monthly || fundFlowData;
 
   // Process data for Waterfall chart
   let cumulative = 0;
-  const waterfallData = fundFlowData.map(item => {
+  const waterfallData = mappedFundFlowData.map(item => {
+    // Adapter for standard or mapped items
+    const amount = item.Amount || item.amount;
+    const date = item.Month || item.date;
     const start = cumulative;
-    cumulative += item.amount;
+    cumulative += amount;
     return {
       ...item,
+      amount,
+      date,
       range: [start, cumulative],
-      labelAmount: item.amount >= 1000000 ? `${item.amount / 1000000}M` : `${item.amount / 1000}K`
+      labelAmount: amount >= 1000000 ? `${amount / 1000000}M` : `${amount / 1000}K`
     };
   });
   

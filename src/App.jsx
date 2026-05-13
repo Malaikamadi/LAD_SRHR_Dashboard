@@ -49,10 +49,21 @@ function renderSection(section, initialEntity) {
   }
 }
 
-export default function App() {
+import { DataProvider, useData } from './context/DataContext';
+
+function DashboardContent() {
   const [activeSection, setActiveSection] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [overviewEntity, setOverviewEntity] = useState(null);
+  const { loading, error } = useData();
+
+  if (loading) {
+    return <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center', background: '#0F172A', color: 'white' }}><h2>Loading National Health Data from Master Excel...</h2></div>;
+  }
+
+  if (error) {
+    return <div style={{ display: 'flex', height: '100vh', width: '100vw', alignItems: 'center', justifyContent: 'center', background: '#0F172A', color: '#F87171' }}><h2>Error loading data: {error}</h2></div>;
+  }
 
   return (
     <div className="app">
@@ -157,5 +168,13 @@ export default function App() {
         </footer>
       </main>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <DataProvider>
+      <DashboardContent />
+    </DataProvider>
   );
 }

@@ -122,7 +122,20 @@ function ProgressRing({ value, target, color, size = 40 }) {
   );
 }
 
+import { useData } from '../context/DataContext';
+
 export default function KPICards() {
+  const { overview } = useData();
+
+  const mappedKpiData = kpiData.map(kpi => {
+    let newValue = kpi.value;
+    if (kpi.id === 'mmr' && overview?.maternalMortalityRate) newValue = overview.maternalMortalityRate;
+    if (kpi.id === 'cpr' && overview?.contraceptivePrevalence) newValue = parseFloat(overview.contraceptivePrevalence);
+    if (kpi.id === 'anc' && overview?.ancAttendance) newValue = parseFloat(overview.ancAttendance);
+    if (kpi.id === 'tpr' && overview?.totalTeenagePregnancies) newValue = overview.totalTeenagePregnancies;
+    return { ...kpi, value: newValue };
+  });
+
   return (
     <section className="kpi-section" id="kpi-section">
       <div className="kpi-section__header">
@@ -142,7 +155,7 @@ export default function KPICards() {
       </div>
 
       <div className="kpi-grid">
-        {kpiData.map((kpi, index) => {
+        {mappedKpiData.map((kpi, index) => {
           const Icon = iconMap[kpi.icon];
           const isNegativeGood = ['mmr', 'tpr', 'gbv'].includes(kpi.id);
           const trendPositive = isNegativeGood ? kpi.change < 0 : kpi.change > 0;
