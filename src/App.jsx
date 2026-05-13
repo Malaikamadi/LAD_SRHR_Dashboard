@@ -70,24 +70,6 @@ export default function App() {
                     Leveraging Health System Pillars and Levers to Improve Sexual and Reproductive Health and Rights (SRHR) in Sierra Leone
                   </h1>
                   <p className="hero-banner__sub">LAD Project Delivery Tracker</p>
-                  <div className="hero-banner__stats">
-                    <div className="hero-banner__stat-box">
-                      <span className="hero-banner__stat-num">16</span>
-                      <span className="hero-banner__stat-lbl">Districts</span>
-                    </div>
-                    <div className="hero-banner__stat-box">
-                      <span className="hero-banner__stat-num">487</span>
-                      <span className="hero-banner__stat-lbl">Facilities</span>
-                    </div>
-                    <div className="hero-banner__stat-box">
-                      <span className="hero-banner__stat-num">10</span>
-                      <span className="hero-banner__stat-lbl">Entities</span>
-                    </div>
-                    <div className="hero-banner__stat-box">
-                      <span className="hero-banner__stat-num">7</span>
-                      <span className="hero-banner__stat-lbl">Health Pillars</span>
-                    </div>
-                  </div>
                 </div>
               </div>
 
