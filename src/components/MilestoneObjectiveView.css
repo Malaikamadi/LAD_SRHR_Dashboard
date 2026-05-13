@@ -1,0 +1,57 @@
+.ms-section { padding:24px 32px;animation:fadeIn .5s ease;width:100%;min-width:0; }
+
+/* ── DYNAMIC HEADER ── */
+.obj-header { display:flex;align-items:center;gap:8px;margin-bottom:24px;flex-wrap:wrap; }
+.obj-header__title { font-size:1.15rem;font-weight:700;color:var(--text-primary);margin:0; }
+.obj-header__select-wrapper { position:relative;display:flex;align-items:center; }
+.obj-header__select { appearance:none;background:transparent;border:none;font-size:1.15rem;font-weight:700;color:var(--text-primary);cursor:pointer;padding-right:24px;outline:none;font-family:var(--font-sans); }
+.obj-header__select:hover { color:var(--color-teal); }
+.obj-header__select-icon { position:absolute;right:0;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none; }
+
+/* ── FILTERS ── */
+.obj-filters { display:flex;gap:16px;margin-bottom:28px;flex-wrap:wrap; }
+.obj-filter-dd { position:relative; }
+.obj-filter-btn { display:flex;align-items:center;gap:12px;padding:10px 18px;background:white;border:1px solid #E2E8F0;border-radius:var(--radius-full);font-size:0.8rem;font-weight:600;color:var(--text-primary);cursor:pointer;font-family:var(--font-sans);transition:all var(--transition-fast);box-shadow:var(--shadow-sm);min-width:140px;justify-content:space-between; }
+.obj-filter-btn:hover { border-color:#CBD5E1;box-shadow:var(--shadow-md);transform:translateY(-1px); }
+.obj-filter-btn--active { border-color:var(--color-teal);box-shadow:0 0 0 3px rgba(15,118,110,0.1); }
+.obj-filter-btn-text { white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px; }
+.obj-filter-btn-icon { color:var(--text-muted);flex-shrink:0; }
+
+.obj-filter-overlay { position:fixed;top:0;left:0;right:0;bottom:0;z-index:40; }
+.obj-filter-menu { position:absolute;left:0;top:calc(100% + 8px);background:white;border:1px solid #E2E8F0;border-radius:var(--radius-md);box-shadow:var(--shadow-xl);z-index:50;min-width:260px;padding:8px;animation:fadeInUp .2s ease both; }
+.obj-filter-search { display:flex;align-items:center;gap:8px;padding:8px 12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:var(--radius-sm);margin-bottom:8px; }
+.obj-filter-search-icon { color:var(--text-muted); }
+.obj-filter-search input { border:none;background:transparent;outline:none;font-size:0.8rem;width:100%;color:var(--text-primary); }
+.obj-filter-list { max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:2px; }
+.obj-filter-item { display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:none;background:transparent;font-size:0.8rem;color:var(--text-primary);cursor:pointer;border-radius:var(--radius-sm);text-align:left;transition:background var(--transition-fast); }
+.obj-filter-item:hover { background:#F1F5F9; }
+.obj-filter-check-wrap { width:16px;display:flex;align-items:center;justify-content:center;color:var(--color-teal); }
+.obj-filter-item-text { line-height:1.3; }
+
+/* ── GRID ── */
+.obj-grid { display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px; }
+.obj-grid-col-left { display:flex;flex-direction:column;gap:24px; }
+.obj-grid-col-center { display:flex;flex-direction:column;gap:24px; }
+.obj-grid-col-right { display:flex;flex-direction:column;justify-content:center; }
+
+/* ── CHART CARDS ── */
+.obj-chart-card { background:white;border:1px solid #E2E8F0;border-radius:var(--radius-lg);padding:16px 20px;box-shadow:var(--shadow-sm);transition:all var(--transition-base); }
+.obj-chart-card:hover { box-shadow:var(--shadow-md);transform:translateY(-2px); }
+.obj-chart-card__title { font-size:0.85rem;font-weight:700;color:var(--text-primary);margin-bottom:16px;line-height:1.4;text-align:center; }
+.obj-chart-card__body { position:relative; }
+
+/* ── DONUT CARD ── */
+.obj-donut-wrapper { position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center; }
+.obj-donut-center-text { position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);text-align:center;display:flex;flex-direction:column;gap:2px;pointer-events:none; }
+.obj-donut-center-text span { font-size:0.75rem;font-weight:800;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.05em; }
+
+@media (max-width:1280px) {
+  .obj-grid { grid-template-columns:1fr 1fr; }
+  .obj-grid-col-right { grid-column:span 2;margin-top:20px; }
+}
+
+@media (max-width:768px) {
+  .obj-grid { grid-template-columns:1fr; }
+  .obj-grid-col-right { grid-column:span 1; }
+  .ms-section { padding:16px 20px; }
+}
