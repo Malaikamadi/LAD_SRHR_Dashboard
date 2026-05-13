@@ -153,25 +153,7 @@ export default function ProcurementTracker() {
 
       {/* ── CHARTS ROW ── */}
       <div className="proc-charts-row">
-        {/* Entity Spending Breakdown */}
-        <div className="proc-chart-card proc-chart-card--wide">
-          <div className="proc-chart-card__header">
-            <h3><Building2 size={16} /> Spending by Entity</h3>
-            <span className="proc-chart-card__badge">Top {entitySpending.length} entities</span>
-          </div>
-          <div className="proc-chart-card__body">
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={entitySpending} layout="vertical" margin={{ left: 10, right: 20, top: 5, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" horizontal={false} />
-                <XAxis type="number" tickFormatter={v => `$${(v/1000).toFixed(0)}K`} tick={{ fontSize: 11, fill: '#94A3B8' }} />
-                <YAxis type="category" dataKey="entity" width={65} tick={{ fontSize: 11, fill: '#334155', fontWeight: 600 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="complete" stackId="a" fill="#10B981" name="Complete" radius={[0,0,0,0]} barSize={18} />
-                <Bar dataKey="ongoing" stackId="a" fill="#F59E0B" name="Ongoing" radius={[0,4,4,0]} barSize={18} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+
 
         {/* Status Distribution Pie */}
         <div className="proc-chart-card">
