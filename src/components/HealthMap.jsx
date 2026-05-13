@@ -1,11 +1,30 @@
 import { useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import { Map as MapIcon, Layers, Users, CheckCircle, Clock } from 'lucide-react';
-import { implementingEntities } from '../data/dashboardData';
+import { implementingEntities as entityDefaults } from '../data/dashboardData';
+import { useData } from '../context/DataContext';
 import './HealthMap.css';
 
 export default function HealthMap() {
+  const { entities } = useData();
   const [hoveredEntity, setHoveredEntity] = useState(null);
+
+  // Live entity list (with coords baked in by the backend), falling back to static.
+  const implementingEntities = (entities && entities.length)
+    ? entities.filter(e => e.lat && e.lng).map(e => ({
+        id: e.id,
+        name: e.name,
+        abbrev: e.abbrev,
+        lat: e.lat,
+        lng: e.lng,
+        color: e.color,
+        progress: e.progress,
+        tasksCompleted: e.tasksCompleted,
+        tasksTotal: e.tasksTotal,
+        budget: e.budget,
+        spent: e.spent,
+      }))
+    : entityDefaults;
 
   return (
     <section className="map-section" id="map-section">

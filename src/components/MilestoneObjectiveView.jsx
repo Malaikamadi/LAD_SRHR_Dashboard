@@ -1,28 +1,19 @@
 import { useState, useMemo } from 'react';
 import { ChevronDown, Check, Search } from 'lucide-react';
 import { ComposedChart, Bar, Line, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
-import { implementingEntities, entityDeepDive } from '../data/dashboardData';
+import { implementingEntities as entityDefaults, entityDeepDive } from '../data/dashboardData';
+import { useData } from '../context/DataContext';
 import './MilestoneObjectiveView.css';
 
-const OBJECTIVES = [
-  { id: 'Obj1', title: 'Objective #1: Create awareness and generate evidence to address GBV' },
-  { id: 'Obj2', title: 'Objective #2: Adopt and institutionalize sustainable health financing through social health insurance (SLeSHI)' },
-  { id: 'Obj3', title: 'Objective #3: Increase the number and quality of health professionals' },
-  { id: 'Obj4', title: 'Objective #4: Real-time SRH data for decision making' },
-  { id: 'Obj5', title: 'Objective #5: Expand integrated SRH service infrastructure and referral systems' },
-  { id: 'Obj6', title: 'Objective #6: Ensure uninterrupted supply and availability of SRH commodities' },
-  { id: 'Obj7', title: 'Objective #7: Improve SRHR program leadership and governance' }
+const OBJECTIVE_FALLBACK = [
+  { id: 'Obj1', name: 'Create awareness and generate evidence to address SRH access barriers' },
+  { id: 'Obj2', name: 'Increase domestic financing for SRH services' },
+  { id: 'Obj3', name: 'Increase the number and quality of health professionals' },
+  { id: 'Obj4', name: 'Strengthen and institutionalise sustainable health financing through SLeSHI' },
+  { id: 'Obj5', name: 'Expand integrated SRH service infrastructure and referral systems' },
+  { id: 'Obj6', name: 'Ensure uninterrupted supply and availability of SRH commodities' },
+  { id: 'Obj7', name: 'Improve SRHR program leadership and governance' },
 ];
-
-const OBJ_ENTITIES_MAP = {
-  'Obj1': ['gender'],
-  'Obj2': ['sleshi'],
-  'Obj3': ['phc', 'comahs', 'postgraduate'],
-  'Obj4': ['dppi'],
-  'Obj5': ['phc', 'rch', 'nems'],
-  'Obj6': ['rch', 'nmsa'],
-  'Obj7': ['dppi', 'donor_coord']
-};
 
 const KPI_TYPES = ['Output', 'Outcome', 'Process', 'Input'];
 const STATUSES = ['Achieved', 'On Track', 'Behind'];
@@ -93,6 +84,7 @@ function ProgressChart({ data, title }) {
 }
 
 export default function MilestoneObjectiveView() {
+  const { objectives, entities } = useData();
   const [selectedObj, setSelectedObj] = useState('Obj2');
   const [kpiType, setKpiType] = useState('');
   const [status, setStatus] = useState('');
@@ -100,10 +92,23 @@ export default function MilestoneObjectiveView() {
   const [kpiFilter, setKpiFilter] = useState('');
   const [year, setYear] = useState('');
 
-  const activeObjective = OBJECTIVES.find(o => o.id === selectedObj) || OBJECTIVES[1];
-  const relatedEntityIds = OBJ_ENTITIES_MAP[activeObjective.id] || [];
-  const entitiesForObj = relatedEntityIds.map(id => implementingEntities.find(e => e.id === id)).filter(Boolean);
+  // Build the objective list — live with fallback
+  const objectiveList = (objectives && objectives.length)
+    ? objectives.map(o => ({ id: o.id, title: `Objective ${o.id.replace('Obj','#')}: ${o.name}`, name: o.name, entities: o.entities }))
+    : OBJECTIVE_FALLBACK.map(o => ({ id: o.id, title: `Objective ${o.id.replace('Obj','#')}: ${o.name}`, name: o.name, entities: [] }));
 
+  const implementingEntities = (entities && entities.length) ? entities : entityDefaults;
+
+  const activeObjective = objectiveList.find(o => o.id === selectedObj) || objectiveList[0];
+  const relatedEntityIds = (activeObjective.entities && activeObjective.entities.length)
+    ? activeObjective.entities.map(e => e.id)
+    : [];
+  const entitiesForObj = relatedEntityIds
+    .map(id => implementingEntities.find(e => e.id === id))
+    .filter(Boolean);
+
+  // KPI rollup per objective: derived from the static deep-dive (the master sheet's
+  // per-period KPIs are activity-level and don't drive quarterly trend charts well).
   const allObjKpis = useMemo(() => {
     return relatedEntityIds.flatMap(entId => {
       const deepDive = entityDeepDive[entId];
@@ -167,7 +172,7 @@ export default function MilestoneObjectiveView() {
         <h2 className="obj-header__title">Deep dive on</h2>
         <div className="obj-header__select-wrapper">
           <select className="obj-header__select" value={selectedObj} onChange={e => setSelectedObj(e.target.value)}>
-            {OBJECTIVES.map(o => <option key={o.id} value={o.id}>{o.title}</option>)}
+            {objectiveList.map(o => <option key={o.id} value={o.id}>{o.title}</option>)}
           </select>
           <ChevronDown size={18} className="obj-header__select-icon" />
         </div>

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Flag, ChevronDown, Target, BarChart3, CheckCircle, Clock, AlertTriangle, Award, TrendingUp, List } from 'lucide-react';
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
-import { implementingEntities, entityDeepDive } from '../data/dashboardData';
+import { implementingEntities as entityDefaults, entityDeepDive as deepDiveDefaults } from '../data/dashboardData';
+import { useData, useEntityDetail } from '../context/DataContext';
 import './MilestoneEntityView.css';
 
 const statusCfg = {
@@ -29,27 +30,32 @@ function KPIProgressBar({ actual, target, color }) {
 }
 
 export default function MilestoneEntityView() {
+  const { entities } = useData();
   const [selectedEntity, setSelectedEntity] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Aggregate all KPIs across entities for summary
-  const allKpis = Object.values(entityDeepDive).flatMap(e => e.kpis);
-  const totalIndicators = allKpis.length;
-  const achievedKpis = allKpis.filter(k => k.status === 'achieved').length;
-  const onTrackKpis = allKpis.filter(k => k.status === 'on-track').length;
-  const behindKpis = allKpis.filter(k => k.status === 'behind').length;
+  // Live list with static fallback
+  const implementingEntities = (entities && entities.length) ? entities : entityDefaults;
 
-  // API progress per entity
-  const entityApiProgress = implementingEntities.map(e => {
-    const dd = entityDeepDive[e.id];
-    if (!dd) return { name: e.abbrev, progress: 0, color: e.color };
-    const total = dd.activities.length;
-    const complete = dd.activities.filter(a => a.status === 'complete').length;
-    return { name: e.abbrev, progress: total > 0 ? Math.round((complete / total) * 100) : 0, color: e.color };
-  });
+  // Detail for selected entity (deferred fetch)
+  const detail = useEntityDetail(selectedEntity);
+  const liveDeep = detail.data;
+  const fallbackDeep = selectedEntity ? deepDiveDefaults[selectedEntity] : null;
+  const deepDive = liveDeep || fallbackDeep;
+
+  // Aggregate KPIs across all entities for the overview summary cards.
+  // (When live data is loaded we don't have all entity KPIs in a single payload;
+  //  we use cumulative task counts instead which the API already provides.)
+  const totalTasks = implementingEntities.reduce((s, e) => s + (e.tasksTotal || 0), 0);
+  const achievedTasks = implementingEntities.reduce((s, e) => s + (e.tasksCompleted || 0), 0);
+  const onTrackTasks = implementingEntities.reduce((s, e) => s + (e.ongoing || 0), 0);
+  const behindTasks = implementingEntities.reduce((s, e) => s + ((e.overdue || 0) + (e.pending || 0)), 0);
+
+  const entityApiProgress = implementingEntities.map(e => ({
+    name: e.abbrev, progress: e.progress || 0, color: e.color,
+  }));
 
   const entity = selectedEntity ? implementingEntities.find(e => e.id === selectedEntity) : null;
-  const deepDive = selectedEntity ? entityDeepDive[selectedEntity] : null;
 
   return (
     <section className="ms-section" id="milestone-section">
@@ -82,23 +88,23 @@ export default function MilestoneEntityView() {
       {!selectedEntity ? (
         /* ===== OVERVIEW MODE ===== */
         <>
-          {/* KPI Summary Cards */}
+          {/* Task Summary Cards (aggregated across all entities) */}
           <div className="ms-kpi-summary">
             <div className="ms-kpi-summary-card">
               <List size={20} color="var(--color-teal)" />
-              <div><span className="ms-kpi-summary-card__value">{totalIndicators}</span><span>Total Indicators</span></div>
+              <div><span className="ms-kpi-summary-card__value">{totalTasks}</span><span>Total Milestones</span></div>
             </div>
             <div className="ms-kpi-summary-card">
               <CheckCircle size={20} color="#10B981" />
-              <div><span className="ms-kpi-summary-card__value" style={{color:'#10B981'}}>{achievedKpis}</span><span>Achieved</span></div>
+              <div><span className="ms-kpi-summary-card__value" style={{color:'#10B981'}}>{achievedTasks}</span><span>Completed</span></div>
             </div>
             <div className="ms-kpi-summary-card">
               <TrendingUp size={20} color="#06B6D4" />
-              <div><span className="ms-kpi-summary-card__value" style={{color:'#06B6D4'}}>{onTrackKpis}</span><span>On Track</span></div>
+              <div><span className="ms-kpi-summary-card__value" style={{color:'#06B6D4'}}>{onTrackTasks}</span><span>Ongoing</span></div>
             </div>
             <div className="ms-kpi-summary-card">
               <AlertTriangle size={20} color="#EF4444" />
-              <div><span className="ms-kpi-summary-card__value" style={{color:'#EF4444'}}>{behindKpis}</span><span>Behind</span></div>
+              <div><span className="ms-kpi-summary-card__value" style={{color:'#EF4444'}}>{behindTasks}</span><span>Overdue / Pending</span></div>
             </div>
           </div>
 
@@ -122,13 +128,9 @@ export default function MilestoneEntityView() {
 
           {/* Entity Cards Grid */}
           <div className="ms-entity-grid">
-            {implementingEntities.map(e => {
-              const dd = entityDeepDive[e.id];
-              if (!dd) return null;
-              const kpiCount = dd.kpis.length;
-              const actCount = dd.activities.length;
-              const completeAct = dd.activities.filter(a=>a.status==='complete').length;
-              return (
+            {implementingEntities
+              .filter(e => (e.tasksTotal || 0) > 0)
+              .map(e => (
                 <button key={e.id} className="ms-entity-card" onClick={() => setSelectedEntity(e.id)} style={{'--ec':e.color}}>
                   <div className="ms-entity-card__header">
                     <span className="ms-entity-card__dot" style={{background:e.color}} />
@@ -136,13 +138,12 @@ export default function MilestoneEntityView() {
                   </div>
                   <div className="ms-entity-card__bar"><div style={{width:`${e.progress}%`,background:e.color}} /></div>
                   <div className="ms-entity-card__stats">
-                    <span>{kpiCount} KPIs</span>
-                    <span>{completeAct}/{actCount} Activities</span>
+                    <span>{e.objectiveCount ?? 0} Objectives</span>
+                    <span>{e.tasksCompleted}/{e.tasksTotal} Milestones</span>
                     <span style={{color:e.color,fontWeight:700}}>{e.progress}%</span>
                   </div>
                 </button>
-              );
-            })}
+              ))}
           </div>
         </>
       ) : (
@@ -162,67 +163,79 @@ export default function MilestoneEntityView() {
             </div>
           </div>
 
+          {detail.loading && (
+            <div className="ms-card"><div className="ms-card__header"><h3>Loading entity detail…</h3></div></div>
+          )}
+
           {/* Objectives */}
-          <div className="ms-card">
-            <div className="ms-card__header"><Target size={18} color="var(--color-teal)" /><h3>Objectives</h3></div>
-            <div className="ms-objectives">
-              {deepDive.objectives.map(obj => (
-                <div key={obj.id} className="ms-objective-item">
-                  <div className="ms-objective-item__top">
-                    <span className="ms-objective-item__id">{obj.id}</span>
-                    <span className="ms-objective-item__name">{obj.name}</span>
-                    <StatusBadge status={obj.status} />
+          {deepDive?.objectives?.length > 0 && (
+            <div className="ms-card">
+              <div className="ms-card__header"><Target size={18} color="var(--color-teal)" /><h3>Objectives</h3></div>
+              <div className="ms-objectives">
+                {deepDive.objectives.map(obj => (
+                  <div key={obj.id} className="ms-objective-item">
+                    <div className="ms-objective-item__top">
+                      <span className="ms-objective-item__id">{obj.id}</span>
+                      <span className="ms-objective-item__name">{obj.name}</span>
+                      {obj.status && <StatusBadge status={obj.status} />}
+                    </div>
+                    {obj.year && <span className="ms-objective-item__year">Implementation: {obj.year}</span>}
                   </div>
-                  <span className="ms-objective-item__year">Implementation: {obj.year}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* KPIs Table */}
-          <div className="ms-card">
-            <div className="ms-card__header"><BarChart3 size={18} color="var(--color-teal)" /><h3>Key Performance Indicators</h3><span className="ms-card__count">{deepDive.kpis.length} indicators</span></div>
-            <div className="ms-table-wrapper">
-              <table className="ms-table">
-                <thead><tr><th>#</th><th>KPI</th><th>Type</th><th>Year</th><th>Target</th><th>Actual</th><th>Progress</th><th>Status</th></tr></thead>
-                <tbody>
-                  {deepDive.kpis.map(kpi => (
-                    <tr key={kpi.id}>
-                      <td>{kpi.id}</td>
-                      <td className="ms-table__kpi-name">{kpi.name}</td>
-                      <td><span className="ms-table__type">{kpi.type}</span></td>
-                      <td>{kpi.year}</td>
-                      <td className="ms-table__num">{kpi.target}</td>
-                      <td className="ms-table__num">{kpi.actual}</td>
-                      <td><KPIProgressBar actual={kpi.actual} target={kpi.target} color={entity.color} /></td>
-                      <td><StatusBadge status={kpi.status} /></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {deepDive?.kpis?.length > 0 && (
+            <div className="ms-card">
+              <div className="ms-card__header"><BarChart3 size={18} color="var(--color-teal)" /><h3>Key Performance Indicators</h3><span className="ms-card__count">{deepDive.kpis.length} indicators</span></div>
+              <div className="ms-table-wrapper">
+                <table className="ms-table">
+                  <thead><tr><th>#</th><th>KPI</th><th>Type</th><th>Year</th><th>Target</th><th>Actual</th><th>Progress</th><th>Status</th></tr></thead>
+                  <tbody>
+                    {deepDive.kpis.map((kpi, i) => (
+                      <tr key={i}>
+                        <td>{i+1}</td>
+                        <td className="ms-table__kpi-name">{kpi.name}</td>
+                        <td><span className="ms-table__type">{kpi.type || '—'}</span></td>
+                        <td>{kpi.year || '—'}</td>
+                        <td className="ms-table__num">{kpi.target != null ? kpi.target.toLocaleString() : '—'}</td>
+                        <td className="ms-table__num">{kpi.actual != null ? kpi.actual.toLocaleString() : '—'}</td>
+                        <td>{kpi.target ? <KPIProgressBar actual={kpi.actual || 0} target={kpi.target} color={entity.color} /> : '—'}</td>
+                        <td><StatusBadge status={kpi.status} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Activities Table */}
-          <div className="ms-card">
-            <div className="ms-card__header"><Award size={18} color="var(--color-teal)" /><h3>Activities & KPI</h3><span className="ms-card__count">{deepDive.activities.length} activities</span></div>
-            <div className="ms-table-wrapper">
-              <table className="ms-table">
-                <thead><tr><th>#</th><th>Activity</th><th>Actual for the Period</th><th>KPI (Key Performance Indicator)</th><th>Status</th></tr></thead>
-                <tbody>
-                  {deepDive.activities.map((act, i) => (
-                    <tr key={i}>
-                      <td>{i+1}</td>
-                      <td className="ms-table__kpi-name">{act.activity}</td>
-                      <td>{act.actual}</td>
-                      <td>{act.api}</td>
-                      <td><StatusBadge status={act.status} /></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {/* Activities & Milestones Table */}
+          {deepDive?.activities?.length > 0 && (
+            <div className="ms-card">
+              <div className="ms-card__header"><Award size={18} color="var(--color-teal)" /><h3>Activities & Milestones</h3><span className="ms-card__count">{deepDive.activities.length} milestones</span></div>
+              <div className="ms-table-wrapper">
+                <table className="ms-table">
+                  <thead><tr><th>#</th><th>Sub-Activity</th><th>Milestone</th><th>Lead</th><th>Planned End</th><th>Actual End</th><th>Status</th></tr></thead>
+                  <tbody>
+                    {deepDive.activities.map((act, i) => (
+                      <tr key={i}>
+                        <td>{i+1}</td>
+                        <td className="ms-table__kpi-name">{act.activity}</td>
+                        <td>{act.milestone || act.api || '—'}</td>
+                        <td>{act.lead || '—'}</td>
+                        <td>{act.plannedEnd || '—'}</td>
+                        <td>{act.actualEnd || act.actual || '—'}</td>
+                        <td><StatusBadge status={act.status} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
         </>
       )}
     </section>

@@ -1,3 +1,6 @@
+// Pulls the master Excel from the configured EXCEL_SOURCE_URL on a cron schedule,
+// falling back to a local cached file if the network fetch fails.
+
 const cron = require('node-cron');
 const axios = require('axios');
 const fs = require('fs');
@@ -8,18 +11,18 @@ class ExcelSyncService {
   constructor() {
     this.sourceUrl = process.env.EXCEL_SOURCE_URL || null;
     this.localFallbackPath = path.join(__dirname, '../uploads/master_data.xlsx');
-    this.syncInterval = process.env.SYNC_INTERVAL || '*/5 * * * *'; // Default 5 mins
+    this.syncInterval = process.env.SYNC_INTERVAL || '*/5 * * * *';
   }
 
   initializeSync() {
-    console.log('Initializing Excel Sync Service...');
-    
-    // Initial fetch
+    console.log('[ExcelSync] Initializing…');
+    console.log(`[ExcelSync] Source: ${this.sourceUrl || '(none — using local fallback only)'}`);
+    console.log(`[ExcelSync] Schedule: ${this.syncInterval}`);
+
     this.syncData();
 
-    // Schedule subsequent fetches
     cron.schedule(this.syncInterval, () => {
-      console.log(`[Cron] Running scheduled Excel sync (${this.syncInterval})...`);
+      console.log(`[ExcelSync] Cron tick (${this.syncInterval})`);
       this.syncData();
     });
   }
@@ -27,37 +30,41 @@ class ExcelSyncService {
   async syncData() {
     try {
       if (!this.sourceUrl) {
-        console.log('No EXCEL_SOURCE_URL provided. Using local fallback file.');
         if (fs.existsSync(this.localFallbackPath)) {
+          console.log('[ExcelSync] No EXCEL_SOURCE_URL — using local fallback.');
           excelService._parseExcelBuffer(fs.readFileSync(this.localFallbackPath));
+          console.log('[ExcelSync] Parsed local fallback successfully.');
         } else {
-          console.warn('Local fallback file also not found. Please provide a data source.');
+          console.warn('[ExcelSync] No source URL and no local fallback — backend has no data.');
         }
         return;
       }
 
-      console.log(`Fetching latest Excel data from ${this.sourceUrl}...`);
-      
+      console.log(`[ExcelSync] Fetching ${this.sourceUrl}`);
+
       const response = await axios({
         method: 'GET',
         url: this.sourceUrl,
-        responseType: 'arraybuffer'
+        responseType: 'arraybuffer',
+        timeout: 90000,
+        maxRedirects: 10,
       });
 
-      console.log('Excel file downloaded successfully. Parsing data...');
-      
-      // Parse the downloaded buffer directly in memory
       excelService._parseExcelBuffer(response.data);
-      
-      // Optionally save it as backup
       fs.writeFileSync(this.localFallbackPath, response.data);
-      console.log('Excel data parsed and cache updated.');
-
+      console.log('[ExcelSync] Synced and parsed master Excel successfully.');
     } catch (error) {
-      console.error('Error syncing Excel data:', error.message);
-      console.log('Falling back to local cached data if available...');
-      if (!excelService.dataCache && fs.existsSync(this.localFallbackPath)) {
-        excelService._parseExcelBuffer(fs.readFileSync(this.localFallbackPath));
+      console.error('[ExcelSync] Sync failed:', error.message);
+      excelService.lastError = error.message;
+
+      if (!excelService.isReady() && fs.existsSync(this.localFallbackPath)) {
+        try {
+          console.log('[ExcelSync] Falling back to last cached copy on disk…');
+          excelService._parseExcelBuffer(fs.readFileSync(this.localFallbackPath));
+          console.log('[ExcelSync] Loaded cached copy.');
+        } catch (fallbackErr) {
+          console.error('[ExcelSync] Local fallback also failed:', fallbackErr.message);
+        }
       }
     }
   }

@@ -1,7 +1,16 @@
 import { Flame } from 'lucide-react';
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Cell, LabelList } from 'recharts';
 import { burnRateData, fundFlowData } from '../data/dashboardData';
+import { useData } from '../context/DataContext';
 import './BurnRate.css';
+
+function formatDateLabel(value) {
+  if (!value) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return new Date(value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  return String(value);
+}
 
 function WaterfallTooltip({ active, payload, label }) {
   if (!active || !payload || payload.length === 0) return null;
@@ -18,27 +27,28 @@ function WaterfallTooltip({ active, payload, label }) {
   );
 }
 
-import { useData } from '../context/DataContext';
-
 export default function BurnRate() {
   const { finance } = useData();
 
-  // Use backend finance data or fallback to static data
-  const totalFunds = finance?.summary?.TotalFundsProvided || burnRateData.totalFunds;
-  const totalDispensed = finance?.summary?.Dispensed || burnRateData.totalDispensed;
-  const totalUnspent = finance?.summary?.Unspent || burnRateData.totalUnspent;
-  
-  // Use static burn rates for now since they are complex or mock them
-  const burnRates = burnRateData.burnRates;
-  
-  const mappedFundFlowData = finance?.monthly || fundFlowData;
+  const summary = finance?.summary || {};
+  const totalFunds     = summary.totalFunds     ?? burnRateData.totalFunds;
+  const totalDispensed = summary.totalDispensed ?? burnRateData.totalDispensed;
+  const totalUnspent   = summary.totalUnspent   ?? burnRateData.totalUnspent;
+  const burnRates = {
+    y2023: summary.burnRates?.y2023 ?? burnRateData.burnRates.y2023,
+    y2024: summary.burnRates?.y2024 ?? burnRateData.burnRates.y2024,
+    y2025: summary.burnRates?.y2025 ?? burnRateData.burnRates.y2025,
+    total: summary.burnRates?.total ?? burnRateData.burnRates.total,
+  };
 
-  // Process data for Waterfall chart
+  // Fund flow waterfall: prefer live disbursement events, fallback to static
+  const liveFundFlow = finance?.fundFlow || [];
+  const sourceFlow = liveFundFlow.length ? liveFundFlow : fundFlowData;
+
   let cumulative = 0;
-  const waterfallData = mappedFundFlowData.map(item => {
-    // Adapter for standard or mapped items
-    const amount = item.Amount || item.amount;
-    const date = item.Month || item.date;
+  const waterfallData = sourceFlow.map(item => {
+    const amount = item.amount ?? item.Amount ?? 0;
+    const date = formatDateLabel(item.date ?? item.Month ?? '');
     const start = cumulative;
     cumulative += amount;
     return {
@@ -46,7 +56,7 @@ export default function BurnRate() {
       amount,
       date,
       range: [start, cumulative],
-      labelAmount: amount >= 1000000 ? `${amount / 1000000}M` : `${amount / 1000}K`
+      labelAmount: amount >= 1000000 ? `${(amount / 1000000).toFixed(1)}M` : `${(amount / 1000).toFixed(0)}K`
     };
   });
   

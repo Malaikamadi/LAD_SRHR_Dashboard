@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { ShoppingCart, Filter, CheckCircle, Clock, AlertTriangle, CircleDot, TrendingUp, DollarSign, Package, Building2, Calendar, ArrowUpRight, BarChart3 } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { procurementData, implementingEntities } from '../data/dashboardData';
+import { procurementData as procurementDefaults, implementingEntities } from '../data/dashboardData';
+import { useData } from '../context/DataContext';
 import './ProcurementTracker.css';
 
 const statusCfg = {
@@ -50,6 +51,9 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 export default function ProcurementTracker() {
+  const { procurement } = useData();
+  const procurementData = procurement && procurement.length ? procurement : procurementDefaults;
+
   const [filterEntity, setFilterEntity] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -71,7 +75,6 @@ export default function ProcurementTracker() {
   const completionRate = Math.round((counts.complete / procurementData.length) * 100);
   const disbursementRate = Math.round((completedAmount / totalAmount) * 100);
 
-  // Entity spending breakdown
   const entitySpending = useMemo(() => {
     const map = {};
     procurementData.forEach(p => {
@@ -82,9 +85,8 @@ export default function ProcurementTracker() {
       if (p.status === 'ongoing') map[p.entity].ongoing += p.amountReq;
     });
     return Object.values(map).sort((a, b) => b.total - a.total);
-  }, []);
+  }, [procurementData]);
 
-  // Status distribution for pie
   const statusPie = useMemo(() => [
     { name: 'Complete', value: counts.complete, color: '#10B981' },
     { name: 'Ongoing', value: counts.ongoing, color: '#F59E0B' },
@@ -92,16 +94,16 @@ export default function ProcurementTracker() {
     { name: 'Overdue', value: counts.overdue, color: '#EF4444' },
   ], [counts]);
 
-  // Objective breakdown
   const objectiveBreakdown = useMemo(() => {
     const map = {};
     procurementData.forEach(p => {
-      if (!map[p.objective]) map[p.objective] = { obj: p.objective, count: 0, amount: 0 };
-      map[p.objective].count += 1;
-      map[p.objective].amount += p.amountReq;
+      const key = p.objective || 'Unassigned';
+      if (!map[key]) map[key] = { obj: key, count: 0, amount: 0 };
+      map[key].count += 1;
+      map[key].amount += p.amountReq;
     });
     return Object.values(map).sort((a, b) => b.amount - a.amount);
-  }, []);
+  }, [procurementData]);
 
   return (
     <section className="proc-section">

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { BarChart3, ChevronDown } from 'lucide-react';
-import { implementingEntities, entityDeepDive } from '../data/dashboardData';
+import { implementingEntities as entityDefaults, entityDeepDive } from '../data/dashboardData';
+import { useData, useEntityDetail } from '../context/DataContext';
 import './AnalyticsSection.css';
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -23,14 +24,19 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 export default function AnalyticsSection({ initialEntity }) {
+  const { entities } = useData();
   const [selectedEntity, setSelectedEntity] = useState(initialEntity || 'all');
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  // Live list (fallback to static)
+  const implementingEntities = (entities && entities.length) ? entities : entityDefaults;
+
   const entity = implementingEntities.find(e => e.id === selectedEntity);
-  const deepDive = selectedEntity !== 'all' ? entityDeepDive[selectedEntity] : null;
+  const detail = useEntityDetail(selectedEntity);
+  const deepDive = selectedEntity !== 'all' ? (detail.data || entityDeepDive[selectedEntity]) : null;
 
   // Build simple chart data for selected entity from deep dive
-  const entityChartData = deepDive ? deepDive.activities.map((a, i) => ({
+  const entityChartData = deepDive ? (deepDive.activities || []).map((a, i) => ({
     name: `Act ${i+1}`, status: a.status === 'complete' ? 100 : a.status === 'on-track' ? 70 : a.status === 'ongoing' ? 50 : 30
   })) : null;
 

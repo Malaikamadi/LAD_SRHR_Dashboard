@@ -3,12 +3,34 @@ import {
   Heart, Baby, Shield, Building2, Stethoscope, UserCheck,
   AlertTriangle, MapPin, TrendingUp, TrendingDown, Target, Activity
 } from 'lucide-react';
-import { kpiData } from '../data/dashboardData';
+import { kpiData as kpiDefaults } from '../data/dashboardData';
+import { useData } from '../context/DataContext';
 import './KPICards.css';
 
 const iconMap = {
   Heart, Baby, Shield, Building2, Stethoscope, UserCheck, AlertTriangle, MapPin
 };
+
+// The backend's national KPI payload carries everything we need to render the cards,
+// but lacks UI-only fields (title, icon, color, unit). We merge against the static
+// defaults from `dashboardData.kpiData` by `id` to fill those in.
+function mergeKpis(apiKpis, defaults) {
+  if (!apiKpis || apiKpis.length === 0) return defaults;
+  return defaults.map((d) => {
+    const live = apiKpis.find((k) => k.id === d.id);
+    if (!live) return d;
+    return {
+      ...d,
+      value: live.value ?? d.value,
+      target: live.target ?? d.target,
+      change: live.change ?? d.change,
+      trend: live.trend ?? d.trend,
+      sparkline: (live.sparkline && live.sparkline.length >= 2) ? live.sparkline : d.sparkline,
+      fromSheet: live.fromSheet,
+      sourceKpi: live.sourceKpi,
+    };
+  });
+}
 
 function AnimatedNumber({ value, decimals = 0, duration = 2000 }) {
   const [display, setDisplay] = useState(0);
@@ -122,19 +144,9 @@ function ProgressRing({ value, target, color, size = 40 }) {
   );
 }
 
-import { useData } from '../context/DataContext';
-
 export default function KPICards() {
-  const { overview } = useData();
-
-  const mappedKpiData = kpiData.map(kpi => {
-    let newValue = kpi.value;
-    if (kpi.id === 'mmr' && overview?.maternalMortalityRate) newValue = overview.maternalMortalityRate;
-    if (kpi.id === 'cpr' && overview?.contraceptivePrevalence) newValue = parseFloat(overview.contraceptivePrevalence);
-    if (kpi.id === 'anc' && overview?.ancAttendance) newValue = parseFloat(overview.ancAttendance);
-    if (kpi.id === 'tpr' && overview?.totalTeenagePregnancies) newValue = overview.totalTeenagePregnancies;
-    return { ...kpi, value: newValue };
-  });
+  const { nationalKpis } = useData();
+  const mappedKpiData = mergeKpis(nationalKpis, kpiDefaults);
 
   return (
     <section className="kpi-section" id="kpi-section">
