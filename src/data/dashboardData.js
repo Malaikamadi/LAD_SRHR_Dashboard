@@ -27,9 +27,15 @@ export const kpiData = [
 ];
 
 export const burnRateData = {
-  totalBudget: 9386711, totalSpent: 8515000,
-  operationalTotal: 5200000, operationalSpent: 4680000,
-  procurementTotal: 4186711, procurementSpent: 3835000,
+  totalFunds: 60000000,
+  totalDispensed: 59100000,
+  totalUnspent: 923500,
+  burnRates: {
+    y2023: 97.83,
+    y2024: 101.62,
+    y2025: 97.20,
+    total: 98.46
+  },
   monthlyBurn: [
     { month:'Jan',operational:380,procurement:290 },{ month:'Feb',operational:420,procurement:310 },
     { month:'Mar',operational:395,procurement:340 },{ month:'Apr',operational:450,procurement:360 },
@@ -41,12 +47,13 @@ export const burnRateData = {
 };
 
 export const fundFlowData = [
-  { stage:'Donor Commitment',amount:9386711,percentage:100 },
-  { stage:'Funds Received',amount:9386711,percentage:100 },
-  { stage:'Allocated to Entities',amount:9200000,percentage:98 },
-  { stage:'Disbursed',amount:8515000,percentage:90.7 },
-  { stage:'Operational Payments',amount:4680000,percentage:49.9 },
-  { stage:'Procurement Activities',amount:3835000,percentage:40.9 },
+  { date: '2023-03-30', amount: 5000000 },
+  { date: '2023-08-09', amount: 5000000 },
+  { date: '2023-11-06', amount: 5000000 },
+  { date: '2024-06-18', amount: 7500000 },
+  { date: '2024-10-18', amount: 7500000 },
+  { date: '2025-11-03', amount: 15000000 },
+  { date: '24/07/2025', amount: 15000000 }
 ];
 
 export const procurementData = [

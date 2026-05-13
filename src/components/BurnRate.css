@@ -1,42 +1,32 @@
-.burn-section { padding:20px 24px;animation:fadeIn .5s ease;width:100%;min-width:0; }
-.burn-section__header { margin-bottom:18px; }
-.burn-section__title { display:flex;align-items:center;gap:8px;font-size:1.05rem; }
-.burn-section__title-icon { color:#F59E0B; }
-.burn-section__subtitle { font-size:0.75rem;color:var(--text-muted);margin-top:2px; }
+.burn-section { padding:24px 32px;animation:fadeIn .5s ease;width:100%;min-width:0; }
+.burn-section__header { margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end; }
+.burn-section__title { font-size:1.15rem;font-weight:700;color:var(--text-primary);margin-bottom:4px;display:flex;align-items:center;gap:8px; }
+.burn-section__title-icon { color:var(--color-orange); }
+.burn-section__subtitle { font-size:0.85rem;color:var(--text-muted); }
 
-/* ── SUMMARY CARDS ── */
-.burn-summary { display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;margin-bottom:18px; }
-.burn-summary-card { background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);padding:16px 20px;display:flex;flex-direction:column;gap:6px;animation:fadeInUp .5s ease both;transition:all var(--transition-base); }
-.burn-summary-card:hover { box-shadow:var(--shadow-lg);transform:translateY(-2px); }
-.burn-summary-card--main { flex-direction:row;align-items:center;gap:20px;flex-wrap:wrap;background:var(--gradient-primary);border:none;color:white;box-shadow:var(--shadow-md); }
-.burn-summary-card--main .burn-summary-card__value { color:white;font-size:1.6rem; }
-.burn-summary-card--main .burn-summary-card__sub { color:rgba(255,255,255,0.7); }
-.burn-summary-card--main .burn-summary-card__bar { flex:1;min-width:180px; }
-.burn-summary-card--main .burn-summary-card__bar div { background:var(--color-teal-light); }
-.burn-summary-card__label { font-size:0.65rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em; }
-.burn-summary-card__value { font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--text-primary); }
-.burn-summary-card__sub { font-size:0.68rem;color:var(--text-muted); }
-.burn-summary-card__bar { height:6px;background:#E2E8F0;border-radius:var(--radius-full);overflow:hidden; }
-.burn-summary-card__bar div { height:100%;border-radius:var(--radius-full);background:var(--gradient-teal);transition:width 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
-.burn-summary-card__bar--teal div { background:#14B8A6; }
-.burn-summary-card__bar--amber div { background:#F59E0B; }
+/* STATS ROW */
+.burn-stats-row { display:flex;gap:16px;margin-bottom:32px;flex-wrap:wrap; }
+.burn-stat-left { display:flex;gap:16px;flex:1;min-width:300px; }
+.burn-stat-card { flex:1;background:white;border:1px solid #E2E8F0;border-radius:12px;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+.burn-stat-card__title { font-size:0.75rem;font-weight:700;color:#1E293B;line-height:1.2;margin-bottom:12px; }
+.burn-stat-card__val { font-size:1.5rem;font-weight:400;color:#1E293B;border:1px solid #E2E8F0;border-radius:16px;padding:4px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.05); }
 
-/* ── FUND FLOW PIPELINE ── */
-.fund-flow { background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:18px;transition:all var(--transition-base); }
-.fund-flow:hover { box-shadow:var(--shadow-md); }
-.fund-flow__title { font-size:0.9rem;font-weight:700;margin-bottom:20px;color:var(--text-primary); }
-.fund-flow__pipeline { display:flex;align-items:flex-end;gap:12px;justify-content:center;flex-wrap:wrap; }
-.fund-flow__stage { display:flex;flex-direction:column;align-items:center;gap:8px;min-width:100px;animation:fadeInUp .5s ease both; }
-.fund-flow__stage-bar { width:54px;height:120px;background:#F1F5F9;border-radius:var(--radius-md);overflow:hidden;display:flex;align-items:flex-end; }
-.fund-flow__stage-fill { width:100%;border-radius:var(--radius-md);transition:height 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
-.fund-flow__stage-info { text-align:center; }
-.fund-flow__stage-amount { display:block;font-family:var(--font-display);font-size:0.85rem;font-weight:800;color:var(--text-primary); }
-.fund-flow__stage-name { display:block;font-size:0.65rem;color:var(--text-muted);max-width:100px;line-height:1.3;margin-top:2px; }
-.fund-flow__stage-pct { display:block;font-size:0.7rem;font-weight:700;color:var(--color-teal);margin-top:2px; }
-.fund-flow__arrow { color:var(--text-muted);margin:0 -8px; }
+.burn-stat-right { flex:1;background:#7CA591;border-radius:12px;padding:16px;display:flex;flex-direction:column;align-items:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);min-width:300px;position:relative; }
+.burn-rate-title { font-size:1.2rem;font-weight:700;color:#FACC15;margin-bottom:12px;text-shadow:0 1px 2px rgba(0,0,0,0.2); }
+.burn-rate-grid { display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;width:100%; }
+.burn-rate-item { display:flex;flex-direction:column;align-items:center;padding:8px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:8px; }
+.burn-rate-item__lbl { font-size:0.7rem;font-weight:700;color:#1E293B;margin-bottom:8px; }
+.burn-rate-item__val { font-size:1.4rem;font-weight:400;color:white; }
+.burn-rate-item__val--blue { color:#2563EB;font-weight:600; }
 
-/* ── CHARTS GRID ── */
-.burn-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:16px; }
+/* WATERFALL */
+.fund-waterfall { background:white;border:1px solid #E2E8F0;border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.05);margin-bottom:32px; }
+.fund-waterfall__title { font-size:0.9rem;font-weight:700;color:#1E293B;text-align:center;margin-bottom:24px;text-transform:uppercase;letter-spacing:0.05em; }
+.fund-waterfall__chart { position:relative; }
 
-@media (max-width:1024px) { .burn-summary{grid-template-columns:1fr} .burn-section{padding:14px 16px} }
-@media (max-width:768px) { .burn-grid{grid-template-columns:1fr} .burn-grid .chart-card--full{grid-column:span 1} .fund-flow__pipeline{flex-direction:column;align-items:center} }
+/* OVERRIDE RECHARTS LABEL */
+.recharts-label-list text { font-family:var(--font-sans); }
+
+/* GRID for bottom charts */
+.burn-grid { display:grid;grid-template-columns:2fr 1fr;gap:24px; }
+@media (max-width:1024px) { .burn-grid { grid-template-columns:1fr; } .burn-stats-row { flex-direction:column; } }
