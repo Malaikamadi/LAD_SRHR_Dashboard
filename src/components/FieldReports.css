@@ -1,0 +1,274 @@
+/* ========================================
+   Field Reports Section Styles
+   ======================================== */
+
+.field-section {
+  padding: var(--space-8);
+  animation: fadeIn 0.5s ease;
+}
+
+.field-section__header {
+  margin-bottom: var(--space-5);
+}
+
+.field-section__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.field-section__title-icon {
+  color: var(--color-teal-light);
+}
+
+.field-section__subtitle {
+  font-size: 0.85rem;
+  color: var(--color-gray-400);
+  margin-top: var(--space-1);
+}
+
+/* Filters */
+.field-filters {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
+}
+
+.field-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-full);
+  color: var(--color-gray-400);
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.field-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-gray-200);
+}
+
+.field-filter-btn--active {
+  background: rgba(15, 118, 110, 0.12);
+  border-color: rgba(15, 118, 110, 0.3);
+  color: var(--color-teal-light);
+}
+
+/* Timeline */
+.field-timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-report-card {
+  display: flex;
+  gap: var(--space-5);
+  animation: fadeInUp 0.6s ease both;
+}
+
+.field-report-card__timeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding-top: var(--space-1);
+}
+
+.field-report-card__dot {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 2;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.field-report-card__line {
+  width: 2px;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.06);
+  margin: var(--space-1) 0;
+}
+
+.field-report-card__body {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-4);
+  transition: all var(--transition-base);
+}
+
+.field-report-card__body:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.field-report-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.field-report-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.field-report-card__type {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+
+.field-report-card__status {
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.field-report-card__datetime {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.72rem;
+  color: var(--color-gray-500);
+}
+
+.field-report-card__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-white);
+  margin-bottom: var(--space-2);
+}
+
+.field-report-card__description {
+  font-size: 0.82rem;
+  color: var(--color-gray-400);
+  line-height: 1.6;
+  margin-bottom: var(--space-4);
+}
+
+.field-report-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.field-report-card__officer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.field-report-card__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(15, 118, 110, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-teal-light);
+}
+
+.field-report-card__officer-name {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.field-report-card__officer-role {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--color-gray-500);
+}
+
+.field-report-card__metrics {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.field-report-card__metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.field-report-card__metric-value {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+.field-report-card__metric-label {
+  font-size: 0.6rem;
+  color: var(--color-gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field-report-card__metric--emergency .field-report-card__metric-value {
+  color: var(--color-danger);
+}
+
+.field-report-card__location {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.7rem;
+  color: var(--color-gray-500);
+  margin-top: var(--space-3);
+}
+
+/* ========================================
+   Responsive
+   ======================================== */
+@media (max-width: 768px) {
+  .field-section {
+    padding: var(--space-4);
+  }
+
+  .field-report-card__timeline {
+    display: none;
+  }
+
+  .field-report-card {
+    gap: 0;
+  }
+
+  .field-report-card__footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

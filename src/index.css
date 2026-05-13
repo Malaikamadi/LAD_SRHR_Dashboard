@@ -1,0 +1,86 @@
+/* ========================================
+   SRHR Dashboard — Light Theme Design System
+   ======================================== */
+:root {
+  --color-deep-blue: #0A2540;
+  --color-navy: #0D2E4D;
+  --color-teal: #0F766E;
+  --color-teal-light: #14B8A6;
+  --color-teal-dark: #0D5C56;
+  --color-cyan: #06B6D4;
+  --color-white: #FFFFFF;
+  --color-gray-50: #F8FAFC;
+  --color-gray-100: #F1F5F9;
+  --color-gray-200: #E2E8F0;
+  --color-gray-300: #CBD5E1;
+  --color-gray-400: #94A3B8;
+  --color-gray-500: #64748B;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1E293B;
+  --color-gray-900: #0F172A;
+  --color-success: #10B981;
+  --color-success-light: rgba(16,185,129,0.1);
+  --color-warning: #F59E0B;
+  --color-warning-light: rgba(245,158,11,0.1);
+  --color-danger: #EF4444;
+  --color-danger-light: rgba(239,68,68,0.1);
+  --color-info: #3B82F6;
+  --color-info-light: rgba(59,130,246,0.1);
+  --gradient-primary: linear-gradient(135deg, #0A2540 0%, #0F766E 100%);
+  --gradient-teal: linear-gradient(135deg, #0F766E 0%, #14B8A6 100%);
+  --gradient-cyan: linear-gradient(135deg, #06B6D4 0%, #14B8A6 100%);
+  --glass-bg: rgba(255,255,255,0.7);
+  --glass-border: rgba(0,0,0,0.06);
+  --card-bg: #FFFFFF;
+  --card-border: #E2E8F0;
+  --page-bg: #F1F5F9;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.06);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  --transition-fast: 150ms cubic-bezier(0.4,0,0.2,1);
+  --transition-base: 250ms cubic-bezier(0.4,0,0.2,1);
+  --sidebar-width: 260px;
+  --sidebar-collapsed: 68px;
+  --header-height: 60px;
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+  --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
+  --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+}
+*,*::before,*::after { margin:0;padding:0;box-sizing:border-box; }
+html { font-size:16px; scroll-behavior:smooth; -webkit-font-smoothing:antialiased; width:100%; overflow-x:hidden; }
+body {
+  font-family: var(--font-sans);
+  background: var(--page-bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+#root { min-height:100vh; display:flex; width: 100%; }
+::-webkit-scrollbar { width:5px;height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--color-gray-300);border-radius:var(--radius-full); }
+h1,h2,h3,h4 { font-family:var(--font-display);font-weight:700;color:var(--text-primary);line-height:1.3; }
+p { color:var(--text-secondary); }
+.text-gradient { background:var(--gradient-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+@keyframes pulseGlow { 0%,100%{box-shadow:0 0 0 0 rgba(15,118,110,0.3)} 50%{box-shadow:0 0 0 8px rgba(15,118,110,0)} }
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+.skeleton { background:linear-gradient(90deg,#E2E8F0 25%,#F1F5F9 50%,#E2E8F0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-md); }
+.leaflet-container { background:var(--page-bg)!important;border-radius:var(--radius-lg); }
+.leaflet-control-attribution { display:none!important; }

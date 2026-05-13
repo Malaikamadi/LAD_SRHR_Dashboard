@@ -1,0 +1,18 @@
+.donor-section { padding:16px 20px;animation:fadeIn .5s ease; }
+.donor-section__header { margin-bottom:14px; }
+.donor-section__title { display:flex;align-items:center;gap:8px;font-size:1rem; }
+.donor-section__title-icon { color:var(--color-teal); }
+.donor-section__subtitle { font-size:0.75rem;color:var(--text-muted);margin-top:2px; }
+.fund-flow { background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:14px; }
+.fund-flow__title { font-size:0.85rem;font-weight:700;margin-bottom:14px;color:var(--text-primary); }
+.fund-flow__pipeline { display:flex;align-items:flex-end;gap:10px;justify-content:center;flex-wrap:wrap; }
+.fund-flow__stage { display:flex;flex-direction:column;align-items:center;gap:6px;min-width:90px;animation:fadeInUp .5s ease both; }
+.fund-flow__stage-bar { width:46px;height:110px;background:#F1F5F9;border-radius:var(--radius-md);overflow:hidden;display:flex;align-items:flex-end; }
+.fund-flow__stage-fill { width:100%;border-radius:var(--radius-md);transition:height 1.5s ease; }
+.fund-flow__stage-info { text-align:center; }
+.fund-flow__stage-amount { display:block;font-family:var(--font-display);font-size:0.8rem;font-weight:700;color:var(--text-primary); }
+.fund-flow__stage-name { display:block;font-size:0.6rem;color:var(--text-muted);max-width:90px;line-height:1.3;margin-top:1px; }
+.fund-flow__stage-pct { display:block;font-size:0.65rem;font-weight:700;color:var(--color-teal);margin-top:1px; }
+.fund-flow__arrow { color:var(--text-muted);margin:0 -6px; }
+.donor-grid { display:grid;grid-template-columns:1fr;gap:12px; }
+@media (max-width:768px) { .donor-section{padding:12px} .fund-flow__pipeline{flex-direction:column;align-items:center} }
