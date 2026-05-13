@@ -25,26 +25,26 @@ const HEALTH_PILLARS = [
 ];
 
 const ENTITIES = [
-  { name: 'Sierra Leone Social Health Insurance', abbr: 'SLESHI', color: '#0F766E' },
-  { name: 'Directorate of Reproductive and Child Health', abbr: 'RCH', color: '#2563EB' },
-  { name: 'Directorate of Primary Health Care', abbr: 'PHC', color: '#7C3AED' },
-  { name: 'Directorate of Policy Planning and Information', abbr: 'DPPI', color: '#D97706' },
-  { name: 'Directorate of National Emergency Medical Services', abbr: 'NEMS', color: '#DC2626' },
-  { name: 'Directorate of Donor Coordination', abbr: 'Donor Coordination', color: '#0891B2' },
-  { name: 'Directorate of College of Medicine and Allied Health Sciences', abbr: 'COMAHS', color: '#059669' },
-  { name: 'Directorate of Gender Sciences', abbr: 'Gender', color: '#DB2777' },
-  { name: 'Directorate of Post Graduate College of Health Specialties', abbr: 'PGCHS', color: '#4F46E5' },
-  { name: 'National Medical Supplies Agency', abbr: 'NMSA', color: '#EA580C' },
+  { id: 'sleshi', name: 'Sierra Leone Social Health Insurance', abbr: 'SLESHI', color: '#0F766E' },
+  { id: 'rch', name: 'Directorate of Reproductive and Child Health', abbr: 'RCH', color: '#2563EB' },
+  { id: 'phc', name: 'Directorate of Primary Health Care', abbr: 'PHC', color: '#7C3AED' },
+  { id: 'dppi', name: 'Directorate of Policy Planning and Information', abbr: 'DPPI', color: '#D97706' },
+  { id: 'nems', name: 'Directorate of National Emergency Medical Services', abbr: 'NEMS', color: '#DC2626' },
+  { id: 'donor_coord', name: 'Directorate of Donor Coordination', abbr: 'Donor Coordination', color: '#0891B2' },
+  { id: 'comahs', name: 'Directorate of College of Medicine and Allied Health Sciences', abbr: 'COMAHS', color: '#059669' },
+  { id: 'gender', name: 'Directorate of Gender Sciences', abbr: 'Gender', color: '#DB2777' },
+  { id: 'postgraduate', name: 'Directorate of Post Graduate College of Health Specialties', abbr: 'PGCHS', color: '#4F46E5' },
+  { id: 'nmsa', name: 'National Medical Supplies Agency', abbr: 'NMSA', color: '#EA580C' },
 ];
 
-function renderSection(section) {
+function renderSection(section, initialEntity) {
   switch (section) {
     case 'overview': return <KPICards />;
     case 'map': return <HealthMap />;
-    case 'analytics': return <AnalyticsSection />;
+    case 'analytics': return <AnalyticsSection initialEntity={initialEntity} />;
     case 'burn-rate': return <BurnRate />;
     case 'procurement': return <ProcurementTracker />;
-    case 'milestones': return <MilestoneTracking />;
+    case 'milestones': return <MilestoneTracking initialEntity={initialEntity} />;
     default: return <KPICards />;
   }
 }
@@ -52,6 +52,7 @@ function renderSection(section) {
 export default function App() {
   const [activeSection, setActiveSection] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [overviewEntity, setOverviewEntity] = useState(null);
 
   return (
     <div className="app">
@@ -127,7 +128,15 @@ export default function App() {
                 </div>
                 <div className="entities-grid">
                   {ENTITIES.map((e) => (
-                    <div className="entity-chip" key={e.abbr} style={{ '--ec': e.color }}>
+                    <div 
+                      className="entity-chip" 
+                      key={e.abbr} 
+                      style={{ '--ec': e.color, cursor: 'pointer' }}
+                      onClick={() => {
+                        setOverviewEntity(e.id);
+                        setActiveSection('analytics');
+                      }}
+                    >
                       <span className="entity-chip__dot" style={{ background: e.color }} />
                       <div className="entity-chip__info">
                         <span className="entity-chip__abbr" style={{ color: e.color }}>{e.abbr}</span>
@@ -140,7 +149,7 @@ export default function App() {
               </section>
             </>
           )}
-          {renderSection(activeSection)}
+          {renderSection(activeSection, overviewEntity)}
         </div>
         <footer className="app__footer">
           <span>Ministry of Health — Sierra Leone</span>

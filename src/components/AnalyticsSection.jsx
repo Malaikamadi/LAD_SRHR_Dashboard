@@ -22,8 +22,8 @@ function CustomTooltip({ active, payload, label }) {
   );
 }
 
-export default function AnalyticsSection() {
-  const [selectedEntity, setSelectedEntity] = useState('all');
+export default function AnalyticsSection({ initialEntity }) {
+  const [selectedEntity, setSelectedEntity] = useState(initialEntity || 'all');
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const entity = implementingEntities.find(e => e.id === selectedEntity);
