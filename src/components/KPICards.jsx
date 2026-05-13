@@ -1,36 +1,17 @@
 import { useEffect, useState, useRef } from 'react';
 import {
   Heart, Baby, Shield, Building2, Stethoscope, UserCheck,
-  AlertTriangle, MapPin, TrendingUp, TrendingDown, Target, Activity
+  AlertTriangle, MapPin, Activity, TrendingUp, TrendingDown, Target
 } from 'lucide-react';
-import { kpiData as kpiDefaults } from '../data/dashboardData';
 import { useData } from '../context/DataContext';
 import './KPICards.css';
 
 const iconMap = {
-  Heart, Baby, Shield, Building2, Stethoscope, UserCheck, AlertTriangle, MapPin
+  Heart, Baby, Shield, Building2, Stethoscope, UserCheck, AlertTriangle, MapPin, Activity
 };
 
-// The backend's national KPI payload carries everything we need to render the cards,
-// but lacks UI-only fields (title, icon, color, unit). We merge against the static
-// defaults from `dashboardData.kpiData` by `id` to fill those in.
-function mergeKpis(apiKpis, defaults) {
-  if (!apiKpis || apiKpis.length === 0) return defaults;
-  return defaults.map((d) => {
-    const live = apiKpis.find((k) => k.id === d.id);
-    if (!live) return d;
-    return {
-      ...d,
-      value: live.value ?? d.value,
-      target: live.target ?? d.target,
-      change: live.change ?? d.change,
-      trend: live.trend ?? d.trend,
-      sparkline: (live.sparkline && live.sparkline.length >= 2) ? live.sparkline : d.sparkline,
-      fromSheet: live.fromSheet,
-      sourceKpi: live.sourceKpi,
-    };
-  });
-}
+// IDs where a downward trend is the desired direction (lower = better)
+const LOWER_IS_BETTER = new Set(['mmr']);
 
 function AnimatedNumber({ value, decimals = 0, duration = 2000 }) {
   const [display, setDisplay] = useState(0);
@@ -146,7 +127,7 @@ function ProgressRing({ value, target, color, size = 40 }) {
 
 export default function KPICards() {
   const { nationalKpis } = useData();
-  const mappedKpiData = mergeKpis(nationalKpis, kpiDefaults);
+  const kpis = Array.isArray(nationalKpis) ? nationalKpis : [];
 
   return (
     <section className="kpi-section" id="kpi-section">
@@ -156,7 +137,7 @@ export default function KPICards() {
             <Activity size={22} className="kpi-section__title-icon" />
             Key Performance Indicators
           </h2>
-          <p className="kpi-section__subtitle">Real-time national SRHR metrics — Q4 2025</p>
+          <p className="kpi-section__subtitle">Real-time national SRHR metrics — sourced from the master sheet</p>
         </div>
         <div className="kpi-section__actions">
           <span className="kpi-live-indicator">
@@ -167,33 +148,34 @@ export default function KPICards() {
       </div>
 
       <div className="kpi-grid">
-        {mappedKpiData.map((kpi, index) => {
-          const Icon = iconMap[kpi.icon];
-          const isNegativeGood = ['mmr', 'tpr', 'gbv'].includes(kpi.id);
-          const trendPositive = isNegativeGood ? kpi.change < 0 : kpi.change > 0;
-          
+        {kpis.map((kpi, index) => {
+          const Icon = iconMap[kpi.icon] || Activity;
+          const isLowerBetter = LOWER_IS_BETTER.has(kpi.id) || kpi.goalLower;
+          const change = Number(kpi.change) || 0;
+          const trendPositive = isLowerBetter ? change < 0 : change > 0;
+          const TrendIcon = change === 0 ? null : (trendPositive ? TrendingDown : TrendingUp);
+          const value = kpi.value ?? 0;
+
           return (
-            <div 
-              key={kpi.id} 
+            <div
+              key={kpi.id}
               className="kpi-card"
               style={{ animationDelay: `${index * 80}ms` }}
               id={`kpi-${kpi.id}`}
+              title={kpi.sourceKpi || ''}
             >
               <div className="kpi-card__top">
                 <div className="kpi-card__icon" style={{ background: `${kpi.color}15`, color: kpi.color }}>
-                  {Icon && <Icon size={20} />}
+                  <Icon size={20} />
                 </div>
-                <ProgressRing value={kpi.value} target={kpi.target} color={kpi.color} />
+                <ProgressRing value={value} target={kpi.target} color={kpi.color} />
               </div>
 
               <div className="kpi-card__body">
                 <p className="kpi-card__label">{kpi.title}</p>
                 <div className="kpi-card__value-row">
                   <span className="kpi-card__value" style={{ color: kpi.color }}>
-                    <AnimatedNumber 
-                      value={kpi.value} 
-                      decimals={kpi.value % 1 !== 0 ? 1 : 0} 
-                    />
+                    <AnimatedNumber value={value} decimals={value % 1 !== 0 ? 1 : 0} />
                   </span>
                   <span className="kpi-card__unit">{kpi.unit}</span>
                 </div>
@@ -201,18 +183,13 @@ export default function KPICards() {
 
               <div className="kpi-card__footer">
                 <div className={`kpi-card__trend ${trendPositive ? 'kpi-card__trend--positive' : 'kpi-card__trend--negative'}`}>
-                  {trendPositive ? <TrendingDown size={14} /> : <TrendingUp size={14} />}
-                  {kpi.id === 'gbv' && kpi.change > 0 ? (
-                    <>
-                      {trendPositive ? <TrendingUp size={14} /> : null}
-                    </>
-                  ) : null}
-                  <span>{Math.abs(kpi.change)}{typeof kpi.value === 'number' && kpi.value < 100 ? '%' : ''}</span>
+                  {TrendIcon && <TrendIcon size={14} />}
+                  <span>{change === 0 ? '—' : `${Math.abs(change)}%`}</span>
                 </div>
                 <MiniSparkline data={kpi.sparkline} color={kpi.color} />
               </div>
-              
-              {kpi.target && (
+
+              {kpi.target != null && (
                 <div className="kpi-card__target">
                   <Target size={11} />
                   <span>Target: {kpi.target}{kpi.unit === '%' ? '%' : ` ${kpi.unit}`}</span>

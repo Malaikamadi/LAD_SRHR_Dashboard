@@ -4,6 +4,7 @@
 const xlsx = require('xlsx');
 
 const { parseIndicators }     = require('../parsers/indicatorsParser');
+const { parseNewDataset }     = require('../parsers/newDatasetParser');
 const { parseImplementation } = require('../parsers/implementationParser');
 const { parseBurnRate }       = require('../parsers/burnRateParser');
 const { parseProcurement }    = require('../parsers/procurementParser');
@@ -24,14 +25,15 @@ class ExcelService {
     const workbook = xlsx.read(buffer, { type: 'buffer' });
 
     const indicators     = parseIndicators(workbook);
+    const newDataset     = parseNewDataset(workbook);
     const implementation = parseImplementation(workbook);
     const burn           = parseBurnRate(workbook);
     const procurement    = parseProcurement(workbook);
     const operational    = parseOperational(workbook);
     const rmnch          = parseRmnch(workbook);
 
-    // National KPIs: prefer indicator-derived; backfill from RMNCH for MMR
-    const nationalKpis = this._buildHeroKpis(indicators.nationalKpis, rmnch);
+    // National hero KPIs: 8 cards pulled entirely from live data sources
+    const nationalKpis = this._buildHeroKpis(newDataset, rmnch);
 
     // Entity-level enriched data: implementation summary + KPIs + finance
     const entities = this._buildEntities(implementation, indicators, procurement, operational);
@@ -67,97 +69,213 @@ class ExcelService {
   }
 
   // ────────────────────────────────────────────────────────────────
-  // Hero KPI builder
+  // Hero KPI builder — all 8 cards from live master-sheet data
   // ────────────────────────────────────────────────────────────────
-  _buildHeroKpis(fromIndicators, rmnch) {
-    // Static defaults for the 8 hero KPIs the frontend renders. Master sheet
-    // data is layered on top — anything missing falls back to these baselines.
-    const HERO_DEFAULTS = [
-      { id: 'mmr', title: 'Maternal Mortality Rate',     unit: 'per 100K', icon: 'Heart',         color: '#EF4444', target: 300, value: 443,  goalLower: true,  change: -8.2 },
-      { id: 'tpr', title: 'Teenage Pregnancy Rate',      unit: '%',        icon: 'Baby',          color: '#F59E0B', target: 20,  value: 28.6, goalLower: true,  change: -3.1 },
-      { id: 'cpu', title: 'Contraceptive Usage',         unit: '%',        icon: 'Shield',        color: '#10B981', target: 35,  value: 21.3, goalLower: false, change: 4.7  },
-      { id: 'hfc', title: 'Health Facility Coverage',    unit: '%',        icon: 'Building2',     color: '#06B6D4', target: 85,  value: 67.4, goalLower: false, change: 2.8  },
-      { id: 'anc', title: 'ANC 4+ Visits',               unit: '%',        icon: 'Stethoscope',   color: '#8B5CF6', target: 75,  value: 58.2, goalLower: false, change: 5.3  },
-      { id: 'sba', title: 'Skilled Birth Attendance',    unit: '%',        icon: 'UserCheck',     color: '#14B8A6', target: 95,  value: 87.1, goalLower: false, change: 1.9  },
-      { id: 'gbv', title: 'GBV Reports',                 unit: 'cases',    icon: 'AlertTriangle', color: '#EF4444', target: null,value: 1247, goalLower: true,  change: 12.4 },
-      { id: 'rht', title: 'Districts On-Track',          unit: 'of 16',    icon: 'MapPin',        color: '#10B981', target: 16,  value: 11,   goalLower: false, change: 2    },
+  _buildHeroKpis(newDataset, rmnch) {
+    // KPI catalog. Each entry declares the card's UI metadata + how to find
+    // its value in the parsed sheets. `sourceMatch` is a regex against the
+    // KPI name in "New dataset"; `sourceType` selects a special handler.
+    const HERO_CATALOG = [
+      {
+        id: 'mmr',
+        title: 'Maternal Mortality Rate',
+        unit: 'per 100K',
+        icon: 'Heart',
+        color: '#EF4444',
+        target: 300,
+        goalLower: true,
+        sourceType: 'rmnch_mmr',
+      },
+      {
+        id: 'pregReg',
+        title: 'Pregnant Women Registered',
+        unit: 'women',
+        icon: 'Baby',
+        color: '#F59E0B',
+        goalLower: false,
+        sourceMatch: /pregnant women registered.*real ?time pregnancy/i,
+      },
+      {
+        id: 'emergRef',
+        title: 'Emergency Referral Success',
+        unit: '%',
+        icon: 'Activity',
+        color: '#10B981',
+        goalLower: false,
+        sourceMatch: /emergency calls received.*successful referrals/i,
+      },
+      {
+        id: 'highRiskDeliv',
+        title: 'High-Risk Pregnancies Delivered',
+        unit: 'cases',
+        icon: 'Stethoscope',
+        color: '#8B5CF6',
+        goalLower: false,
+        sourceMatch: /high risk preg.*successfully delivered/i,
+      },
+      {
+        id: 'delivRec',
+        title: 'Deliveries Recorded',
+        unit: '%',
+        icon: 'Building2',
+        color: '#06B6D4',
+        goalLower: false,
+        sourceMatch: /deliveries recorded from total number of pregnancies/i,
+      },
+      {
+        id: 'dataComplete',
+        title: 'SRH Data Completeness',
+        unit: '%',
+        icon: 'Shield',
+        color: '#14B8A6',
+        goalLower: false,
+        sourceMatch: /completeness of SRH data.*programme indicators/i,
+      },
+      {
+        id: 'ambulance',
+        title: 'Functioning Ambulances',
+        unit: 'of 68',
+        icon: 'AlertTriangle',
+        color: '#EC4899',
+        target: 68,
+        goalLower: false,
+        sourceMatch: /smooth functioning ambulances/i,
+      },
+      {
+        id: 'rht',
+        title: 'Districts On-Track',
+        unit: 'of 16',
+        icon: 'MapPin',
+        color: '#10B981',
+        target: 16,
+        goalLower: false,
+        sourceType: 'rmnch_districts',
+      },
     ];
 
-    const overrideMap = new Map(fromIndicators.map((k) => [k.id, k]));
-
-    // ── MMR: derive from RMNCH Scorecard (scale per-10,000 → per-100K) ──
-    if (rmnch.latestByDistrict.length) {
-      const mmrVals = rmnch.latestByDistrict.map((d) => d.mmr).filter((v) => v != null);
-      if (mmrVals.length) {
-        // Scale: master sheet stores "per 10,000 deliveries"; dashboard shows "per 100K"
-        const scaled = mmrVals.map((v) => v * 10);
-        const avgMmr = Math.round(scaled.reduce((s, v) => s + v, 0) / scaled.length);
-
-        // Trend: compare current avg against earliest available year's avg
-        const allRmnchScaled = rmnch.rows
-          .filter((r) => r.mmr != null && r.year)
-          .map((r) => ({ year: r.year, value: r.mmr * 10 }));
-        const earliestYear = Math.min(...allRmnchScaled.map((r) => r.year));
-        const latestYear = Math.max(...allRmnchScaled.map((r) => r.year));
-        const earliestVals = allRmnchScaled.filter((r) => r.year === earliestYear).map((r) => r.value);
-        const latestVals   = allRmnchScaled.filter((r) => r.year === latestYear).map((r) => r.value);
-        const avgOf = (a) => a.length ? a.reduce((s, v) => s + v, 0) / a.length : 0;
-        const prev = avgOf(earliestVals);
-        const curr = avgOf(latestVals);
-        const change = prev ? Number((((curr - prev) / prev) * 100).toFixed(1)) : 0;
-
-        // Sparkline: chronologically averaged across districts per quarter/year
-        const byPeriod = new Map();
-        for (const r of rmnch.rows) {
-          if (r.mmr == null) continue;
-          const key = `${r.year}-${r.quarter}`;
-          if (!byPeriod.has(key)) byPeriod.set(key, []);
-          byPeriod.get(key).push(r.mmr * 10);
-        }
-        const sparkline = [...byPeriod.entries()]
-          .sort((a, b) => a[0].localeCompare(b[0]))
-          .map(([, vals]) => Math.round(avgOf(vals)));
-
-        overrideMap.set('mmr', {
-          id: 'mmr',
-          value: avgMmr,
-          target: 300,
-          change,
-          sparkline: sparkline.slice(-11),
-          sourceKpi: 'RMNCH Scorecard (hospital MMR averaged across 16 districts, scaled to per-100K)',
-        });
-      }
-
-      // ── Districts on-track: count districts at or below the national target (300 per 100K) ──
-      const scaledLatest = rmnch.latestByDistrict.map((d) => d.mmr != null ? d.mmr * 10 : null).filter((v) => v != null);
-      const onTrack = scaledLatest.filter((v) => v <= 300).length;
-      overrideMap.set('rht', {
-        id: 'rht',
-        value: onTrack,
-        target: 16,
-        change: 0,
-        sparkline: [onTrack],
-        sourceKpi: 'RMNCH Scorecard (districts with MMR ≤ 300/100K)',
-      });
-    }
-
-    return HERO_DEFAULTS.map((d) => {
-      const override = overrideMap.get(d.id);
-      const merged = { ...d };
-      if (override) {
-        if (override.value != null) merged.value = override.value;
-        if (override.target != null) merged.target = override.target;
-        if (override.change != null && override.change !== 0) merged.change = override.change;
-        if (override.sparkline && override.sparkline.length >= 2) merged.sparkline = override.sparkline;
-        if (override.sourceKpi) merged.sourceKpi = override.sourceKpi;
-        merged.fromSheet = true;
-      } else {
-        merged.fromSheet = false;
-      }
-      merged.trend = merged.change > 0 ? 'up' : (merged.change < 0 ? 'down' : 'flat');
-      if (!merged.sparkline) merged.sparkline = [merged.value];
-      return merged;
+    return HERO_CATALOG.map((meta) => {
+      if (meta.sourceType === 'rmnch_mmr')        return this._buildMmrKpi(meta, rmnch);
+      if (meta.sourceType === 'rmnch_districts')  return this._buildDistrictsKpi(meta, rmnch);
+      return this._buildKpiFromNewDataset(meta, newDataset);
     });
+  }
+
+  // MMR from RMNCH Scorecard (per 10K → per 100K)
+  _buildMmrKpi(meta, rmnch) {
+    const base = { ...meta, value: null, change: 0, sparkline: [], fromSheet: false };
+    if (!rmnch?.latestByDistrict?.length) return { ...base, trend: 'flat' };
+
+    const latestVals = rmnch.latestByDistrict.map((d) => d.mmr).filter((v) => v != null).map((v) => v * 10);
+    if (!latestVals.length) return { ...base, trend: 'flat' };
+
+    const avg = (a) => a.reduce((s, v) => s + v, 0) / a.length;
+    const value = Math.round(avg(latestVals));
+
+    // Trend across earliest vs latest year
+    const scaled = rmnch.rows.filter((r) => r.mmr != null && r.year).map((r) => ({ year: r.year, value: r.mmr * 10 }));
+    const earliestYear = Math.min(...scaled.map((r) => r.year));
+    const latestYear   = Math.max(...scaled.map((r) => r.year));
+    const prev = avg(scaled.filter((r) => r.year === earliestYear).map((r) => r.value));
+    const curr = avg(scaled.filter((r) => r.year === latestYear).map((r) => r.value));
+    const change = prev ? Number((((curr - prev) / prev) * 100).toFixed(1)) : 0;
+
+    // Sparkline by year-quarter
+    const buckets = new Map();
+    for (const r of rmnch.rows) {
+      if (r.mmr == null) continue;
+      const key = `${r.year}-${r.quarter}`;
+      (buckets.get(key) ?? buckets.set(key, []).get(key)).push(r.mmr * 10);
+    }
+    const sparkline = [...buckets.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([, vals]) => Math.round(avg(vals)))
+      .slice(-11);
+
+    return {
+      ...meta,
+      value,
+      change,
+      sparkline: sparkline.length >= 2 ? sparkline : [value],
+      sourceKpi: 'RMNCH Scorecard — Hospital MMR per 10K deliveries (averaged across districts, scaled to per-100K)',
+      fromSheet: true,
+      trend: change > 0 ? 'up' : (change < 0 ? 'down' : 'flat'),
+    };
+  }
+
+  // Districts at/below the national MMR target
+  _buildDistrictsKpi(meta, rmnch) {
+    const base = { ...meta, value: 0, change: 0, sparkline: [0], fromSheet: false, trend: 'flat' };
+    if (!rmnch?.latestByDistrict?.length) return base;
+
+    const scaledLatest = rmnch.latestByDistrict
+      .map((d) => d.mmr != null ? d.mmr * 10 : null)
+      .filter((v) => v != null);
+    const onTrack = scaledLatest.filter((v) => v <= 300).length;
+
+    return {
+      ...meta,
+      value: onTrack,
+      change: 0,
+      sparkline: [onTrack],
+      sourceKpi: 'RMNCH Scorecard — districts with hospital MMR ≤ 300 per 100K',
+      fromSheet: true,
+      trend: 'flat',
+    };
+  }
+
+  // Generic KPI from the New dataset tab
+  _buildKpiFromNewDataset(meta, newDataset) {
+    const base = { ...meta, value: null, change: 0, sparkline: [], fromSheet: false, trend: 'flat' };
+    if (!newDataset?.byKpi) return base;
+
+    // Find first KPI in byKpi map whose name matches meta.sourceMatch
+    let match = null;
+    for (const entry of newDataset.byKpi.values()) {
+      if (meta.sourceMatch.test(entry.name)) { match = entry; break; }
+    }
+    if (!match || !match.series.length) return base;
+
+    // Build sparkline: last ~11 actuals (normalize percentages stored as fractions)
+    const normalize = (v) => {
+      if (v == null) return null;
+      if (match.isPercent && Math.abs(v) <= 1.5) return Number((v * 100).toFixed(1));
+      return v;
+    };
+
+    const series = match.series
+      .filter((s) => s.actual != null)
+      .map((s) => ({
+        year: s.year,
+        period: s.period,
+        actual: normalize(s.actual),
+        target: normalize(s.target),
+      }));
+    if (!series.length) return base;
+
+    const sparkline = series.slice(-11).map((s) => s.actual);
+    const latest = series[series.length - 1];
+    const first  = series[0];
+    const change = first.actual ? Number((((latest.actual - first.actual) / first.actual) * 100).toFixed(1)) : 0;
+
+    // Target: prefer the latest period's target if present, else meta.target, else project target
+    const periodTarget = latest.target;
+    const projectTarget = match.rows.find((r) => r.projectTarget != null)?.projectTarget;
+    const target = meta.target != null
+      ? meta.target
+      : (periodTarget != null
+        ? periodTarget
+        : (projectTarget != null ? (match.isPercent && projectTarget <= 1.5 ? projectTarget * 100 : projectTarget) : null));
+
+    return {
+      ...meta,
+      value: latest.actual,
+      target,
+      change,
+      sparkline: sparkline.length >= 2 ? sparkline : [latest.actual],
+      sourceKpi: match.name,
+      fromSheet: true,
+      trend: change > 0 ? 'up' : (change < 0 ? 'down' : 'flat'),
+    };
   }
 
   // ────────────────────────────────────────────────────────────────
