@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import KPICards from './components/KPICards';
@@ -13,12 +13,6 @@ import {
   Users, Activity, Target, ChevronRight
 } from 'lucide-react';
 import './App.css';
-
-const CENTRAL_GOAL = {
-  title: 'Reduce Preventable Maternal and Child Deaths',
-  target: 'Less than 300 per 100,000 by end of 2025',
-  status: '302 per 100,000 (internal data)',
-};
 
 const HEALTH_PILLARS = [
   { id: 1, title: 'Service Delivery',           desc: 'Quality-assured, standardised and patient-centred care',                                                                                       icon: HeartPulse,  color: '#15803D' },
@@ -67,8 +61,20 @@ function DashboardContent() {
   const [activeSection, setActiveSection] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [overviewEntity, setOverviewEntity] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') return 'light';
+    return localStorage.getItem('lad-theme')
+      || (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  });
   const { loading, error, refresh } = useData();
   const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5001';
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('lad-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 
   if (loading) {
     return (
@@ -102,7 +108,7 @@ function DashboardContent() {
     <div className="app">
       <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
       <main className={`app__main ${sidebarCollapsed ? 'app__main--expanded' : ''}`}>
-        <Header activeSection={activeSection} />
+        <Header activeSection={activeSection} theme={theme} onToggleTheme={toggleTheme} />
         <div className={`app__content ${activeSection === 'overview' ? 'app__content--overview' : ''}`}>
           {activeSection === 'overview' && (
             <>
@@ -129,19 +135,6 @@ function DashboardContent() {
                     <p className="about-section__text">
                       The Sierra Leone Ministry of Health is leveraging five Health System Pillars and Levers to improve Sexual and Reproductive Health and Rights (SRHR) in Sierra Leone through the implementation of a performance management system and the application of Deliverology® to support the leadership with data for decision-making. This dashboard visualises critical data to aid problem-solving and decision-making.
                     </p>
-                  </div>
-                </div>
-              </section>
-
-              {/* ── CENTRAL GOAL BANNER ── */}
-              <section className="section central-goal-section">
-                <div className="central-goal">
-                  <div className="central-goal__label">Central Goal</div>
-                  <h2 className="central-goal__title">{CENTRAL_GOAL.title}</h2>
-                  <div className="central-goal__target">Target: <strong>{CENTRAL_GOAL.target}</strong></div>
-                  <div className="central-goal__status">
-                    <span className="central-goal__status-dot" />
-                    Current Status: <strong>{CENTRAL_GOAL.status}</strong>
                   </div>
                 </div>
               </section>
