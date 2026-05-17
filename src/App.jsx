@@ -116,7 +116,7 @@ function DashboardContent() {
               <div className="hero-banner">
                 <div className="hero-banner__overlay" />
                 <div className="hero-banner__content">
-                  <div className="hero-banner__badge">🇸🇱 Republic of Sierra Leone — Ministry of Health</div>
+                  <div className="hero-banner__badge">🇸🇱 Ministry of Health Sierra Leone</div>
                   <h1 className="hero-banner__title">
                     Leveraging Health System Pillars and Levers to Improve Sexual and Reproductive Health and Rights (SRHR) in Sierra Leone
                   </h1>
