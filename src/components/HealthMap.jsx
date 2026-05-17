@@ -31,7 +31,7 @@ export default function HealthMap() {
       <div className="map-section__header">
         <div>
           <h2 className="map-section__title"><MapIcon size={20} className="map-section__title-icon" /> Implementing Entities Location</h2>
-          <p className="map-section__subtitle">Location of all 10 implementing entities with task completion status</p>
+          <p className="map-section__subtitle">Location of all 10 implementing entities with implementation progress</p>
         </div>
       </div>
 

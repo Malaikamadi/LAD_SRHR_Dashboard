@@ -40,6 +40,7 @@ export function DataProvider({ children }) {
         objectives,
         finance,
         procurement,
+        operational,
         rmnch,
       ] = await Promise.all([
         fetchJson('/api/kpis/national'),
@@ -47,6 +48,7 @@ export function DataProvider({ children }) {
         fetchJson('/api/objectives'),
         fetchJson('/api/finance'),
         fetchJson('/api/procurement'),
+        fetchJson('/api/operational').catch(() => []),
         fetchJson('/api/rmnch'),
       ]);
 
@@ -56,8 +58,8 @@ export function DataProvider({ children }) {
         objectives,
         finance,
         procurement,
+        operational,
         rmnch,
-        operational: null,
         milestones: null,
         meta: null,
         loading: false,

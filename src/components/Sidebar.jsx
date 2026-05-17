@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LayoutDashboard, Map, BarChart3, Flame, Handshake, ShoppingCart, Flag, ChevronLeft, ChevronRight, Search, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Map, BarChart3, Flame, ShoppingCart, Wallet, Flag, ChevronLeft, ChevronRight, Search, Menu, X } from 'lucide-react';
 import './Sidebar.css';
 
 const navItems = [
@@ -9,6 +9,7 @@ const navItems = [
   { id: 'analytics', icon: BarChart3, label: 'Implementing Entities Analytics' },
   { id: 'burn-rate', icon: Flame, label: 'Burn Rate' },
   { id: 'procurement', icon: ShoppingCart, label: 'Procurement Tracker' },
+  { id: 'operational', icon: Wallet, label: 'Operational Tracker' },
 ];
 
 export default function Sidebar({ activeSection, onSectionChange, collapsed, onToggleCollapse }) {

@@ -6,23 +6,34 @@ import HealthMap from './components/HealthMap';
 import AnalyticsSection from './components/AnalyticsSection';
 import BurnRate from './components/BurnRate';
 import ProcurementTracker from './components/ProcurementTracker';
+import OperationalTracker from './components/OperationalTracker';
 import MilestoneTracking from './components/MilestoneTracking';
 import {
-  Search, HeartPulse, Building2, BarChart3, GraduationCap,
-  Landmark, Package, ShieldCheck, BookOpen, Stethoscope,
-  ClipboardList, Users, Activity, Target, ChevronRight
+  HeartPulse, Stethoscope, Package, Truck, Database, ShieldCheck,
+  Users, Activity, Target, ChevronRight
 } from 'lucide-react';
 import './App.css';
 
+const CENTRAL_GOAL = {
+  title: 'Reduce Preventable Maternal and Child Deaths',
+  target: 'Less than 300 per 100,000 by end of 2025',
+  status: '302 per 100,000 (internal data)',
+};
+
 const HEALTH_PILLARS = [
-  { id: 1, title: 'Create awareness and generate evidence', desc: 'Address critical barriers to access SRH services', icon: Search, color: '#0F766E' },
-  { id: 2, title: 'Sustainable health financing', desc: 'Adopt and institutionalize through social health insurance (SLeSHI)', icon: Landmark, color: '#0891B2' },
-  { id: 3, title: 'Increase health professionals', desc: 'Improve SRH services by increasing the quantity and quality of health professionals', icon: GraduationCap, color: '#7C3AED' },
-  { id: 4, title: 'Real-time SRH data', desc: 'Inform decision-making and align data generation cycles with decision-makers\' needs', icon: BarChart3, color: '#2563EB' },
-  { id: 5, title: 'Expand service infrastructure', desc: 'Expand integrated SRH service infrastructure and referral systems', icon: Building2, color: '#D97706' },
-  { id: 6, title: 'Uninterrupted supply chain', desc: 'Ensure uninterrupted supply and availability of SRH commodities in health facilities', icon: Package, color: '#DC2626' },
-  { id: 7, title: 'Program leadership & governance', desc: 'Improve SRHR program leadership and governance', icon: ShieldCheck, color: '#059669' },
+  { id: 1, title: 'Service Delivery',           desc: 'Quality-assured, standardised and patient-centred care',                                                                                       icon: HeartPulse,  color: '#15803D' },
+  { id: 2, title: 'Health Workforce',           desc: 'Skilled, motivated, and equitably deployed workforce delivering quality, client-centred SRH care at all levels',                              icon: Stethoscope, color: '#16A34A' },
+  { id: 3, title: 'Supply Chain',               desc: 'Availability & continuous access to essential SRH commodities through efficient, transparent, and locally led systems',                       icon: Package,     color: '#0891B2' },
+  { id: 4, title: 'Referral Systems',           desc: 'Coordinated, timely and reliable patient transfers to ensure access to appropriate care without delay',                                       icon: Truck,       color: '#2563EB' },
+  { id: 5, title: 'Data and Digital Systems',   desc: 'Real-time, evidence-based decisions through integrated digital tools and quality data systems',                                              icon: Database,    color: '#1D4ED8' },
 ];
+
+const CROSS_CUTTING_PILLAR = {
+  title: 'Cross-cutting pillars: Governance and M&E',
+  desc: 'Strong leadership, accountability and continuous monitoring & evaluation underpin all five pillars',
+  icon: ShieldCheck,
+  color: '#0F766E',
+};
 
 const ENTITIES = [
   { id: 'sleshi', name: 'Sierra Leone Social Health Insurance', abbr: 'SLESHI', color: '#0F766E' },
@@ -44,6 +55,7 @@ function renderSection(section, initialEntity) {
     case 'analytics': return <AnalyticsSection initialEntity={initialEntity} />;
     case 'burn-rate': return <BurnRate />;
     case 'procurement': return <ProcurementTracker />;
+    case 'operational': return <OperationalTracker />;
     case 'milestones': return <MilestoneTracking initialEntity={initialEntity} />;
     default: return <KPICards />;
   }
@@ -91,7 +103,7 @@ function DashboardContent() {
       <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
       <main className={`app__main ${sidebarCollapsed ? 'app__main--expanded' : ''}`}>
         <Header activeSection={activeSection} />
-        <div className="app__content">
+        <div className={`app__content ${activeSection === 'overview' ? 'app__content--overview' : ''}`}>
           {activeSection === 'overview' && (
             <>
               {/* ── HERO BANNER ── */}
@@ -107,29 +119,40 @@ function DashboardContent() {
               </div>
 
               {/* ── ABOUT SECTION ── */}
-              <section className="about-section">
+              <section className="section about-section">
                 <div className="about-section__inner">
                   <div className="about-section__icon-wrap">
                     <Activity size={28} />
                   </div>
                   <div>
-                    <h2 className="about-section__title">About the Dashboard</h2>
+                    <h2 className="section__title about-section__title">About the Dashboard</h2>
                     <p className="about-section__text">
-                      The Sierra Leone Ministry of Health is leveraging seven Health System Pillars and Levers to improve Sexual and Reproductive Health and Rights (SRHR) in Sierra Leone through the implementation of a performance management system and the application of Deliverology® to support the leadership with data for decision-making. This dashboard visualises critical data to aid problem-solving and decision-making.
+                      The Sierra Leone Ministry of Health is leveraging five Health System Pillars and Levers to improve Sexual and Reproductive Health and Rights (SRHR) in Sierra Leone through the implementation of a performance management system and the application of Deliverology® to support the leadership with data for decision-making. This dashboard visualises critical data to aid problem-solving and decision-making.
                     </p>
                   </div>
                 </div>
               </section>
 
-              {/* ── HEALTH PILLARS ── */}
-              <section className="pillars-section">
-                <div className="pillars-section__header">
-                  <div className="pillars-section__header-left">
-                    <Target size={20} className="pillars-section__icon" />
-                    <div>
-                      <h2 className="pillars-section__title">Seven Health System Pillars</h2>
-                      <p className="pillars-section__subtitle">Strategic objectives driving SRHR improvements across Sierra Leone</p>
-                    </div>
+              {/* ── CENTRAL GOAL BANNER ── */}
+              <section className="section central-goal-section">
+                <div className="central-goal">
+                  <div className="central-goal__label">Central Goal</div>
+                  <h2 className="central-goal__title">{CENTRAL_GOAL.title}</h2>
+                  <div className="central-goal__target">Target: <strong>{CENTRAL_GOAL.target}</strong></div>
+                  <div className="central-goal__status">
+                    <span className="central-goal__status-dot" />
+                    Current Status: <strong>{CENTRAL_GOAL.status}</strong>
+                  </div>
+                </div>
+              </section>
+
+              {/* ── 5 KEY PILLARS ── */}
+              <section className="section pillars-section">
+                <div className="section__header">
+                  <Target size={18} className="section__icon" />
+                  <div>
+                    <h2 className="section__title">5 Key Pillars</h2>
+                    <p className="section__subtitle">Strategic levers driving SRHR improvements across Sierra Leone</p>
                   </div>
                 </div>
                 <div className="pillars-grid">
@@ -137,8 +160,8 @@ function DashboardContent() {
                     const Icon = p.icon;
                     return (
                       <div className="pillar-card" key={p.id} style={{ '--pc': p.color }}>
-                        <div className="pillar-card__icon-wrap" style={{ background: `${p.color}12`, color: p.color }}>
-                          <Icon size={26} />
+                        <div className="pillar-card__icon-wrap" style={{ background: `${p.color}1A`, color: p.color }}>
+                          <Icon size={24} />
                         </div>
                         <div className="pillar-card__num">Pillar {p.id}</div>
                         <h3 className="pillar-card__title">{p.title}</h3>
@@ -147,15 +170,26 @@ function DashboardContent() {
                     );
                   })}
                 </div>
+
+                {/* Cross-cutting Pillar */}
+                <div className="pillar-card pillar-card--cross" style={{ '--pc': CROSS_CUTTING_PILLAR.color }}>
+                  <div className="pillar-card__icon-wrap" style={{ background: `${CROSS_CUTTING_PILLAR.color}1A`, color: CROSS_CUTTING_PILLAR.color }}>
+                    <CROSS_CUTTING_PILLAR.icon size={22} />
+                  </div>
+                  <div>
+                    <h3 className="pillar-card__title">{CROSS_CUTTING_PILLAR.title}</h3>
+                    <p className="pillar-card__desc">{CROSS_CUTTING_PILLAR.desc}</p>
+                  </div>
+                </div>
               </section>
 
               {/* ── IMPLEMENTING ENTITIES ── */}
-              <section className="entities-section">
-                <div className="entities-section__header">
-                  <Users size={20} className="entities-section__icon" />
+              <section className="section entities-section">
+                <div className="section__header">
+                  <Users size={18} className="section__icon" />
                   <div>
-                    <h2 className="entities-section__title">Implementing Entities</h2>
-                    <p className="entities-section__subtitle">Directorates and agencies responsible for programme delivery</p>
+                    <h2 className="section__title">Implementing Entities</h2>
+                    <p className="section__subtitle">Directorates and agencies responsible for programme delivery</p>
                   </div>
                 </div>
                 <div className="entities-grid">

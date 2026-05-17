@@ -1,6 +1,6 @@
 import { Bell, User, ChevronRight, Calendar } from 'lucide-react';
 import './Header.css';
-const sectionTitles = { 'overview':'Executive Overview','map':'Implementing Entities Location','analytics':'Implementing Entities Analytics','burn-rate':'Burn Rate','procurement':'Procurement Tracker','milestones':'Milestone Tracking' };
+const sectionTitles = { 'overview':'Executive Overview','map':'Implementing Entities Location','analytics':'Implementing Entities Analytics','burn-rate':'Burn Rate','procurement':'Procurement Tracker','operational':'Operational Tracker','milestones':'Milestone Tracking' };
 export default function Header({ activeSection }) {
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});

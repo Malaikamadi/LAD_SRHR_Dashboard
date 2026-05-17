@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
+import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
 import { BarChart3, ChevronDown } from 'lucide-react';
 import { implementingEntities as entityDefaults, entityDeepDive } from '../data/dashboardData';
 import { useData, useEntityDetail } from '../context/DataContext';
@@ -76,7 +76,7 @@ export default function AnalyticsSection({ initialEntity }) {
           <>
             {/* Overall Entity Progress Comparison */}
             <div className="chart-card chart-card--full">
-              <div className="chart-card__header"><h3>Entity Performance Comparison</h3><p className="chart-card__subtitle">Overall task completion by implementing entity</p></div>
+              <div className="chart-card__header"><h3>Entity Performance Comparison</h3><p className="chart-card__subtitle">Overall progress by implementing entity</p></div>
               <div className="chart-card__body">
                 <ResponsiveContainer width="100%" height={360}>
                   <BarChart data={overallComparison} layout="vertical" barGap={4}>
@@ -91,24 +91,8 @@ export default function AnalyticsSection({ initialEntity }) {
                 </ResponsiveContainer>
               </div>
             </div>
-            {/* Tasks Summary Donut */}
-            <div className="chart-card">
-              <div className="chart-card__header"><h3>Tasks Overview</h3><p className="chart-card__subtitle">Completed vs pending across all entities</p></div>
-              <div className="chart-card__body">
-                <ResponsiveContainer width="100%" height={280}>
-                  <PieChart>
-                    <Pie data={[{name:'Completed',value:implementingEntities.reduce((s,e)=>s+e.tasksCompleted,0)},{name:'Pending',value:implementingEntities.reduce((s,e)=>s+(e.tasksTotal-e.tasksCompleted),0)}]}
-                      cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value" stroke="none">
-                      <Cell fill="#10B981" /><Cell fill="#E2E8F0" />
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend wrapperStyle={{fontSize:'12px'}} formatter={v=><span style={{color:'#475569'}}>{v}</span>} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
             {/* Budget Utilization */}
-            <div className="chart-card">
+            <div className="chart-card chart-card--full">
               <div className="chart-card__header"><h3>Budget Utilization</h3><p className="chart-card__subtitle">Allocated vs spent per entity</p></div>
               <div className="chart-card__body">
                 <ResponsiveContainer width="100%" height={280}>

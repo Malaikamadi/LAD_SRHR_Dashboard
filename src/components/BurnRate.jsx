@@ -104,7 +104,7 @@ export default function BurnRate() {
                <span className="burn-rate-item__val">{burnRates.y2025}%</span>
              </div>
              <div className="burn-rate-item">
-               <span className="burn-rate-item__lbl">At total Disbursement</span>
+               <span className="burn-rate-item__lbl">Total Disbursement</span>
                <span className="burn-rate-item__val burn-rate-item__val--blue">{burnRates.total}%</span>
              </div>
           </div>
