@@ -3,8 +3,17 @@
 .app__main--expanded { margin-left:var(--sidebar-collapsed);width:calc(100% - var(--sidebar-collapsed)); }
 .app__content { flex:1;min-width:0;width:100%; }
 
-/* Apply hero-style dark gradient as backdrop for the entire Executive Overview */
+/* Apply hero-style gradient as backdrop for the entire Executive Overview */
+/* Light mode: soft teal/blue tinted light gradient */
 .app__content--overview {
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(20,184,166,0.06), transparent 50%),
+    radial-gradient(ellipse at 90% 30%, rgba(6,182,212,0.04), transparent 50%),
+    linear-gradient(180deg, #E8F5F3 0%, #EEF6FB 35%, #F1F5F9 70%, #F8FAFC 100%);
+  color: var(--text-primary);
+}
+/* Dark mode: original dark gradient */
+[data-theme="dark"] .app__content--overview {
   background:
     radial-gradient(ellipse at 20% 0%, rgba(20,184,166,0.12), transparent 50%),
     radial-gradient(ellipse at 90% 30%, rgba(6,182,212,0.08), transparent 50%),
@@ -23,9 +32,9 @@
 .section__subtitle { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
 
 /* Title/subtitle colors flip when sitting on the dark overview backdrop */
-.app__content--overview .section__title,
-.app__content--overview .about-section__title { color: #F8FAFC; }
-.app__content--overview .section__subtitle { color: rgba(226,232,240,0.65); }
+[data-theme="dark"] .app__content--overview .section__title,
+[data-theme="dark"] .app__content--overview .about-section__title { color: #F8FAFC; }
+[data-theme="dark"] .app__content--overview .section__subtitle { color: rgba(226,232,240,0.65); }
 
 /* ============================================
    HERO BANNER — Freetown aerial photo backdrop
@@ -183,17 +192,17 @@
 }
 
 /* On dark backdrop: make the about card translucent */
-.app__content--overview .about-section__inner {
+[data-theme="dark"] .app__content--overview .about-section__inner {
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.10);
   border-left: 4px solid #2DD4BF;
   backdrop-filter: blur(8px);
 }
-.app__content--overview .about-section__icon-wrap {
+[data-theme="dark"] .app__content--overview .about-section__icon-wrap {
   background: rgba(45,212,191,0.15);
   color: #5EEAD4;
 }
-.app__content--overview .about-section__text { color: rgba(226,232,240,0.85); }
+[data-theme="dark"] .app__content--overview .about-section__text { color: rgba(226,232,240,0.85); }
 
 /* ============================================
    CENTRAL GOAL BANNER
@@ -307,16 +316,16 @@
 .pillar-card--cross .pillar-card__desc { font-size: 0.78rem; }
 
 /* On dark backdrop: translucent pillar cards */
-.app__content--overview .pillar-card {
+[data-theme="dark"] .app__content--overview .pillar-card {
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.10);
   border-top: 3px solid var(--pc);
   backdrop-filter: blur(8px);
 }
-.app__content--overview .pillar-card__title { color: #F8FAFC; }
-.app__content--overview .pillar-card__desc { color: rgba(226,232,240,0.75); }
-.app__content--overview .pillar-card__num { color: rgba(226,232,240,0.55); }
-.app__content--overview .pillar-card--cross {
+[data-theme="dark"] .app__content--overview .pillar-card__title { color: #F8FAFC; }
+[data-theme="dark"] .app__content--overview .pillar-card__desc { color: rgba(226,232,240,0.75); }
+[data-theme="dark"] .app__content--overview .pillar-card__num { color: rgba(226,232,240,0.55); }
+[data-theme="dark"] .app__content--overview .pillar-card--cross {
   background: linear-gradient(90deg, color-mix(in srgb, var(--pc) 30%, transparent) 0%, rgba(255,255,255,0.04) 70%);
   border-top: 0;
   border-left: 4px solid var(--pc);
@@ -332,13 +341,13 @@
 }
 
 /* On dark backdrop: translucent entity chips */
-.app__content--overview .entity-chip {
+[data-theme="dark"] .app__content--overview .entity-chip {
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.10);
   backdrop-filter: blur(6px);
 }
-.app__content--overview .entity-chip__name { color: rgba(226,232,240,0.70); }
-.app__content--overview .entity-chip:hover {
+[data-theme="dark"] .app__content--overview .entity-chip__name { color: rgba(226,232,240,0.70); }
+[data-theme="dark"] .app__content--overview .entity-chip:hover {
   background: rgba(255,255,255,0.10);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--ec) 35%, transparent);
 }
