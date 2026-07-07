@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import KPICards from './components/KPICards';
@@ -10,7 +10,7 @@ import OperationalTracker from './components/OperationalTracker';
 import MilestoneTracking from './components/MilestoneTracking';
 import {
   HeartPulse, Stethoscope, Package, Truck, Database, ShieldCheck,
-  Users, Activity, Target, ChevronRight
+  Users, Activity, Target, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import './App.css';
 
@@ -28,6 +28,13 @@ const CROSS_CUTTING_PILLAR = {
   icon: ShieldCheck,
   color: '#0F766E',
 };
+
+const HERO_SLIDES = [
+  { src: '/hero-freetown.jpg',  alt: 'Aerial view of Freetown, Sierra Leone' },
+  { src: '/hero-slide-2.png',   alt: 'Healthcare workers serving patients in a modern clinic' },
+  { src: '/hero-slide-3.png',   alt: 'Community health outreach in rural Sierra Leone' },
+  { src: '/hero-slide-4.png',   alt: 'Medical supply chain distribution centre' },
+];
 
 const ENTITIES = [
   { id: 'sleshi', name: 'Sierra Leone Social Health Insurance', abbr: 'SLESHI', color: '#0F766E' },
@@ -56,6 +63,83 @@ function renderSection(section, initialEntity) {
 }
 
 import { DataProvider, useData } from './context/DataContext';
+
+/* ── HERO IMAGE SLIDER COMPONENT ── */
+function HeroSlider() {
+  const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const timerRef = useRef(null);
+  const count = HERO_SLIDES.length;
+
+  const goTo = useCallback((idx) => {
+    setCurrent((idx + count) % count);
+  }, [count]);
+
+  const next = useCallback(() => goTo(current + 1), [current, goTo]);
+  const prev = useCallback(() => goTo(current - 1), [current, goTo]);
+
+  // Auto-advance every 6 s
+  useEffect(() => {
+    if (isPaused) return;
+    timerRef.current = setInterval(() => {
+      setCurrent((c) => (c + 1) % count);
+    }, 6000);
+    return () => clearInterval(timerRef.current);
+  }, [isPaused, count]);
+
+  return (
+    <div
+      className="hero-slider"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* Slide images */}
+      {HERO_SLIDES.map((slide, i) => (
+        <div
+          key={slide.src}
+          className={`hero-slider__slide ${i === current ? 'hero-slider__slide--active' : ''}`}
+          style={{ backgroundImage: `url(${slide.src})` }}
+          aria-hidden={i !== current}
+        />
+      ))}
+
+      {/* Overlay gradient */}
+      <div className="hero-slider__overlay" />
+
+      {/* Content */}
+      <div className="hero-banner__content">
+        <div className="hero-banner__badge">🇸🇱 Ministry of Health Sierra Leone</div>
+        <h1 className="hero-banner__title">
+          Leveraging Health System Pillars and Levers to Improve Sexual and Reproductive Health and Rights (SRHR) in Sierra Leone
+        </h1>
+        <p className="hero-banner__sub">LAD Project Delivery Tracker</p>
+      </div>
+
+      {/* Navigation arrows */}
+      <button className="hero-slider__arrow hero-slider__arrow--prev" onClick={prev} aria-label="Previous slide">
+        <ChevronLeft size={22} />
+      </button>
+      <button className="hero-slider__arrow hero-slider__arrow--next" onClick={next} aria-label="Next slide">
+        <ChevronRight size={22} />
+      </button>
+
+      {/* Dot indicators */}
+      <div className="hero-slider__dots">
+        {HERO_SLIDES.map((_, i) => (
+          <button
+            key={i}
+            className={`hero-slider__dot ${i === current ? 'hero-slider__dot--active' : ''}`}
+            onClick={() => goTo(i)}
+            aria-label={`Go to slide ${i + 1}`}
+          />
+        ))}
+      </div>
+
+      {/* Teal accent bar at bottom */}
+      <div className="hero-slider__accent" />
+    </div>
+  );
+}
 
 function DashboardContent() {
   const [activeSection, setActiveSection] = useState('overview');
@@ -112,17 +196,8 @@ function DashboardContent() {
         <div className={`app__content ${activeSection === 'overview' ? 'app__content--overview' : ''}`}>
           {activeSection === 'overview' && (
             <>
-              {/* ── HERO BANNER ── */}
-              <div className="hero-banner">
-                <div className="hero-banner__overlay" />
-                <div className="hero-banner__content">
-                  <div className="hero-banner__badge">🇸🇱 Ministry of Health Sierra Leone</div>
-                  <h1 className="hero-banner__title">
-                    Leveraging Health System Pillars and Levers to Improve Sexual and Reproductive Health and Rights (SRHR) in Sierra Leone
-                  </h1>
-                  <p className="hero-banner__sub">LAD Project Delivery Tracker</p>
-                </div>
-              </div>
+              {/* ── HERO IMAGE SLIDER ── */}
+              <HeroSlider />
 
               {/* ── ABOUT SECTION ── */}
               <section className="section about-section">
