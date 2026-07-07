@@ -20,7 +20,7 @@ export default function Sidebar({ activeSection, onSectionChange, collapsed, onT
       {mobileOpen && <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />}
       <aside className={`sidebar ${collapsed ? 'sidebar--collapsed' : ''} ${mobileOpen ? 'sidebar--mobile-open' : ''}`}>
         <div className="sidebar__logo">
-          <div className="sidebar__logo-icon"><img src="/mohs-logo.png" alt="MoHS Logo" className="sidebar__logo-img" /></div>
+          <div className="sidebar__logo-icon"><img src="/mohs_logo.jpg" alt="MoHS Logo" className="sidebar__logo-img" /></div>
           {!collapsed && <div className="sidebar__logo-text"><span className="sidebar__logo-title">LAD SRHR Dashboard</span><span className="sidebar__logo-subtitle">Ministry of Health</span></div>}
           <button className="sidebar__mobile-close" onClick={() => setMobileOpen(false)}><X size={20} /></button>
         </div>
