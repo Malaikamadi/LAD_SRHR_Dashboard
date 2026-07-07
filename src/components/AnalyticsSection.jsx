@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
+import { useState, useEffect } from 'react';
+import { BarChart, Bar, Legend, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
 import { BarChart3, ChevronDown } from 'lucide-react';
 import { implementingEntities as entityDefaults, entityDeepDive } from '../data/dashboardData';
 import { useData, useEntityDetail } from '../context/DataContext';
@@ -27,6 +27,13 @@ export default function AnalyticsSection({ initialEntity }) {
   const { entities } = useData();
   const [selectedEntity, setSelectedEntity] = useState(initialEntity || 'all');
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // Sync when the parent passes a new initialEntity (e.g. user clicks an entity chip)
+  useEffect(() => {
+    if (initialEntity) {
+      setSelectedEntity(initialEntity);
+    }
+  }, [initialEntity]);
 
   // Live list (fallback to static)
   const implementingEntities = (entities && entities.length) ? entities : entityDefaults;
